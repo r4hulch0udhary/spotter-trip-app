@@ -26,6 +26,8 @@ const Register = () => {
         <div className="container mt-5">
             <h2>Register</h2>
             <form onSubmit={handleSubmit}>
+            <input type="text" className="form-control mb-2" placeholder="First Name" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input type="text" className="form-control mb-2" placeholder="Last Name" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 <input type="text" className="form-control mb-2" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
                 <input type="email" className="form-control mb-2" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 <input type="password" className="form-control mb-2" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />

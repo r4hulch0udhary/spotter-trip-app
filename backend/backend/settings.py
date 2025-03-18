@@ -138,5 +138,6 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3001",  # React frontend
+    "http://localhost:3000",  # React frontend
 ]
+CORS_ALLOW_ALL_ORIGINS = True
