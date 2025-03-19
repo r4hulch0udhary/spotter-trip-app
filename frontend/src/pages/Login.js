@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import '../styles/login.css'; // Adjust the path based on your folder structure
+import "../styles/login.css"; // Adjust path as needed
 
 const Login = () => {
     const [username, setUsername] = useState("");

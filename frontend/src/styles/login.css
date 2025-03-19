@@ -1,58 +1,100 @@
-body {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
+/* General container styles */
+.signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #d9f0f0, #ffffff);
 }
 
-.login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-.login-card {
+/* Signup Card */
+.signup-card {
     background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
+    width: 350px;
 }
 
 h2 {
-    margin-bottom: 20px;
-    color: #333;
+    margin-bottom: 5px;
+    color: #222;
 }
 
+p {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Labels */
+
+
+/* Input Fields */
 .form-control {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    transition: border-color 0.3s;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #f5f5f5;
+    font-size: 16px;
 }
 
 .form-control:focus {
-    border-color: #6a11cb;
-    outline: none;
+    outline: 2px solid #667eea;
 }
 
-.btn {
-    background-color: #6a11cb;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
+/* Phone Input */
+.phone-container {
+    display: flex;
+    align-items: center;
+}
+
+.phone-input {
+    width: 100% !important;
+    border-radius: 8px !important;
+    font-size: 16px !important;
+    background: #f5f5f5 !important;
+    border: none !important;
+}
+
+/* Password Field */
+.password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-field input {
+    flex: 1;
+    padding-right: 40px;
+}
+
+.password-field span {
+    position: absolute;
+    right: 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    color: #777;
+    font-size: 18px;
+}
+
+/* Submit Button */
+.btn {
     width: 100%;
+    padding: 12px;
+    background: #08c17f;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
 }
 
 .btn:hover {
-    background-color: #2575fc;
+    background: #06a96d;
 }
+

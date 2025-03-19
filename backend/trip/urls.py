@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from trip.auth import RegisterUserAPIView, LogoutAPIView
-from .views import TripView
+from .views import UserLocationView
 
 
 urlpatterns = [
@@ -10,6 +10,8 @@ urlpatterns = [
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('logout/', LogoutAPIView.as_view(), name='logout'),
-    path('api/trip/', TripView.as_view(), name='trip_api'),
+    path("location/", UserLocationView.as_view(), name="user-location"),
+
+    # path('api/trip/', TripView.as_view(), name='trip_api'),
 
 ]
