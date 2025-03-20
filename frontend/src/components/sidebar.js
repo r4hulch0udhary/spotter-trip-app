@@ -28,7 +28,7 @@ const Sidebar = () => {
           <Link to="/" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
             <FiHome size={20} /> Home
           </Link>
-          <Link to="/plan-trip" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
+          <Link to="/trip" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
             <FiMap size={20} /> Plan Trip
           </Link>
           <Link to="/log-sheet" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">

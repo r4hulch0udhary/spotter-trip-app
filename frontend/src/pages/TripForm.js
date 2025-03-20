@@ -1,78 +1,140 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 
-const LocationFetcher = () => {
-  const [location, setLocation] = useState(null);
+const TripPlanner = () => {
+  const [pickupCity, setPickupCity] = useState("");
+  const [dropoffCity, setDropoffCity] = useState("");
+  const [cycleHours, setCycleHours] = useState(50);
+  const [loading, setLoading] = useState(false);
+  const [tripData, setTripData] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!("geolocation" in navigator)) {
-      setError("Geolocation is not supported by this browser.");
+  const fetchCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
-        setLocation({ latitude, longitude });
-
-        try {
-          const token = localStorage.getItem("token");
-          if (!token) {
-            console.error("No authentication token found.");
-            return;
-          }
-
-          // ✅ Send latitude & longitude as query parameters in GET request
-          const response = await axios.get(
-            `http://localhost:8000/api/location/?latitude=${latitude}&longitude=${longitude}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          console.log("Location sent successfully:", response.data);
-        } catch (err) {
-          console.error("Error sending location:", err.response ? err.response.data : err.message);
-        }
+        console.log("Current Location:", latitude, longitude);
+        setPickupCity(""); // Clear manual entry
+        sendLocationToBackend(latitude, longitude);
       },
-      (err) => {
-        setError(err.message);
+      (error) => {
+        console.error("Error getting location:", error);
+        alert("Failed to get current location.");
       }
     );
-  }, []);
+  };
+
+  const sendLocationToBackend = async (latitude, longitude) => {
+    try {
+      await axios.post("http://localhost:8000/api/trip/", {
+        latitude,
+        longitude,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      alert("Location updated!");
+    } catch (error) {
+      console.error("Error updating location:", error.response);
+      alert("Failed to update location.");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post("http://localhost:8000/api/trip/", {
+        pickup_city: pickupCity || null,
+        dropoff_city: dropoffCity,
+        cycle_hours: cycleHours,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setTripData(response.data);
+    } catch (error) {
+      console.error("Error planning trip:", error);
+      setError(error.response?.data?.error || "Failed to plan trip.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h2 className="text-2xl font-bold mb-4">User Location</h2>
-      {error ? (
-        <p className="text-red-500">{error}</p>
-      ) : location ? (
-        <>
-          <p className="mb-2">📍 Latitude: {location.latitude}, Longitude: {location.longitude}</p>
-          <div className="w-full max-w-lg h-96">
-            <MapContainer
-              key={`${location.latitude}-${location.longitude}`} // Forces re-render when location updates
-              center={[location.latitude, location.longitude]}
-              zoom={13}
-              className="h-full w-full rounded-lg shadow-lg"
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[location.latitude, location.longitude]}>
-                <Popup>You are here</Popup>
-              </Marker>
-            </MapContainer>
-          </div>
-        </>
-      ) : (
-        <p>Fetching location...</p>
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-4">Plan Your Trip</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block font-medium">Pickup City (optional):</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Enter pickup city or use current location"
+            value={pickupCity}
+            onChange={(e) => setPickupCity(e.target.value)}
+          />
+          <button
+            type="button"
+            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={fetchCurrentLocation}
+          >
+            Use Current Location
+          </button>
+        </div>
+
+        <div>
+          <label className="block font-medium">Drop-off City:</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded"
+            placeholder="Enter drop-off city"
+            value={dropoffCity}
+            onChange={(e) => setDropoffCity(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">Cycle Hours:</label>
+          <input
+            type="number"
+            className="w-full p-2 border rounded"
+            value={cycleHours}
+            onChange={(e) => setCycleHours(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded w-full" disabled={loading}>
+          {loading ? "Planning Trip..." : "Plan Trip"}
+        </button>
+      </form>
+
+      {error && <p className="text-red-500 mt-4">{error}</p>}
+
+      {tripData && (
+        <div className="mt-6 p-4 bg-gray-100 rounded">
+          <h3 className="text-lg font-bold">Trip Details</h3>
+          <p><strong>Pickup:</strong> {tripData.pickup_city}</p>
+          <p><strong>Drop-off:</strong> {tripData.dropoff_city}</p>
+          <p><strong>Distance:</strong> {tripData.distance_km} km</p>
+          <p><strong>Duration:</strong> {tripData.formatted_duration}</p>
+        </div>
       )}
     </div>
   );
 };
 
-export default LocationFetcher;
+export default TripPlanner;

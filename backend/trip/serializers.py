@@ -17,10 +17,10 @@ class UserSerializer(serializers.ModelSerializer):
     
 
 
-# class TripSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Trip
-#         fields = '__all__'
+class TripSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trip
+        fields = '__all__'
 
 class UserLocationSerializer(serializers.ModelSerializer):
     class Meta:

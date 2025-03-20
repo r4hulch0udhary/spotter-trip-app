@@ -141,3 +141,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend
 ]
 CORS_ALLOW_ALL_ORIGINS = True
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),  # Increase access token expiry (e.g., 6 hours)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Increase refresh token expiry (e.g., 7 days)
+    "ROTATE_REFRESH_TOKENS": True,  # Optionally rotate refresh tokens
+    "BLACKLIST_AFTER_ROTATION": True,  # Blacklist old refresh tokens
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
