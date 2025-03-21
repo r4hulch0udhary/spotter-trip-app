@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 class Trip(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    current_latitude = models.FloatField(default=0.0)
+    current_longitude = models.FloatField(default=0.0)
 
     # Pickup details
     pickup_city = models.CharField(max_length=100,blank=True)  # Stores the city name
@@ -27,12 +29,3 @@ class Trip(models.Model):
     def __str__(self):
         return f"Trip: {self.pickup_city} → {self.dropoff_city}"
 
-
-class UserLocation(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.latitude}, {self.longitude}"

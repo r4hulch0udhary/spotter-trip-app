@@ -1,62 +1,51 @@
-
-import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import UserLocation
-from .serializers import UserLocationSerializer
 from .models import Trip
 from .serializers import TripSerializer
-from .utils import get_coordinates,get_route_details
-
-# class UserLocationView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         user = request.user
-#         print(user,'useruser')
-#         latitude = request.query_params.get("latitude")
-#         longitude = request.query_params.get("longitude")
-
-#         if latitude is None or longitude is None:
-#             return Response({"error": "Latitude and longitude are required."}, status=400)
-
-#         location, created = UserLocation.objects.update_or_create(
-#             user=user,
-#             defaults={"latitude": latitude, "longitude": longitude},
-#         )
-
-#         return Response(UserLocationSerializer(location).data)
-    
-
-
+from .utils import get_coordinates, get_route_details
 
 class PlanTripView(APIView):
     """API View to plan a trip by providing pickup & drop-off city names."""
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        print(" Processing trip request...")
+        print("Processing trip request...")
 
         user = request.user
         data = request.data
 
-        pickup_city = data.get("pickup_city")
+        pickup_city = data.get("pickup_city")  # Allow null if using geolocation
         dropoff_city = data.get("dropoff_city")
         cycle_hours = data.get("cycle_hours", 0)
 
-        if not pickup_city or not dropoff_city:
-            return Response({"error": "Pickup and Drop-off locations are required."}, status=400)
+        current_latitude = data.get("current_latitude")  # From frontend geolocation
+        current_longitude = data.get("current_longitude")
 
-        # Convert city names to coordinates
-        pickup_lat, pickup_lon = get_coordinates(pickup_city)
+        if not dropoff_city:
+            return Response({"error": "Drop-off location is required."}, status=400)
+
+        # Get coordinates for pickup location
+        if pickup_city:
+            pickup_lat, pickup_lon = get_coordinates(pickup_city)
+            if pickup_lat is None:
+                return Response({"error": "Invalid pickup city name."}, status=400)
+        elif current_latitude and current_longitude:
+            # Use geolocation if no pickup city is provided
+            pickup_lat, pickup_lon = float(current_latitude), float(current_longitude)
+            pickup_city = "Current Location"
+        else:
+            return Response({"error": "Pickup location or geolocation is required."}, status=400)
+
+        # Get coordinates for drop-off location
         dropoff_lat, dropoff_lon = get_coordinates(dropoff_city)
-
-        if pickup_lat is None or dropoff_lat is None:
-            return Response({"error": "Invalid city name(s)."}, status=400)
+        if dropoff_lat is None:
+            return Response({"error": "Invalid drop-off city name."}, status=400)
 
         # Get route details
-        distance_km, duration_hours, formatted_duration, route_data = get_route_details(pickup_lat, pickup_lon, dropoff_lat, dropoff_lon)
+        distance_km, duration_hours, formatted_duration, route_data = get_route_details(
+            pickup_lat, pickup_lon, dropoff_lat, dropoff_lon
+        )
 
         if distance_km is None:
             return Response({"error": "Could not calculate route."}, status=500)
@@ -64,6 +53,8 @@ class PlanTripView(APIView):
         # Save trip details
         trip = Trip.objects.create(
             user=user,
+            current_latitude=pickup_lat,
+            current_longitude=pickup_lon,
             pickup_city=pickup_city,
             pickup_latitude=pickup_lat,
             pickup_longitude=pickup_lon,
@@ -72,15 +63,13 @@ class PlanTripView(APIView):
             dropoff_longitude=dropoff_lon,
             cycle_hours=cycle_hours,
             distance_km=distance_km,
-            duration_hours=formatted_duration,  # ✅ Storing the numeric value
+            duration_hours=formatted_duration,
             route_data=route_data
         )
 
-        print(" Trip successfully created!")
+        print("Trip successfully created!")
 
-        # Return trip details, including formatted duration
         trip_data = TripSerializer(trip).data
-        trip_data["formatted_duration"] = formatted_duration  # ✅ Adding readable format
+        trip_data["formatted_duration"] = formatted_duration  
 
         return Response(trip_data, status=200)
-

@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Trip
-from .models import UserLocation
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,7 +21,3 @@ class TripSerializer(serializers.ModelSerializer):
         model = Trip
         fields = '__all__'
 
-class UserLocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserLocation
-        fields = ["user", "latitude", "longitude", "updated_at"]
