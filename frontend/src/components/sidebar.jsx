@@ -7,34 +7,34 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <div className="sidebar-container">
       {/* Sidebar Toggle Button */}
       <button
-        className="fixed top-4 left-4 z-50 p-2 bg-blue-500 text-white rounded-full shadow-lg focus:outline-none"
+        className="sidebar-toggle"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
       </button>
 
-      {/* Sidebar */}
+      {/* Sidebar Menu */}
       <motion.div
-        className="fixed top-0 left-0 h-full w-64 bg-gray-900 text-white shadow-xl flex flex-col p-5 z-40"
-        initial={{ x: -300 }}
-        animate={{ x: isOpen ? 0 : -300 }}
+        className="sidebar"
+        initial={{ x: -250 }}
+        animate={{ x: isOpen ? 0 : -250 }}
         transition={{ duration: 0.3 }}
       >
-        <h2 className="text-xl font-bold mb-6">Trip Planner</h2>
-        <nav className="flex flex-col gap-4">
-          <Link to="/" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
+        <h2 className="sidebar-title">Trip Planner</h2>
+        <nav className="sidebar-nav">
+          <Link to="/" className="sidebar-item">
             <FiHome size={20} /> Home
           </Link>
-          <Link to="/trip" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
+          <Link to="/trip" className="sidebar-item">
             <FiMap size={20} /> Plan Trip
           </Link>
-          <Link to="/log-sheet" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
+          <Link to="/log-sheet" className="sidebar-item">
             <FiClipboard size={20} /> Log Sheet
           </Link>
-          <Link to="/settings" className="flex items-center gap-3 p-2 hover:bg-gray-700 rounded">
+          <Link to="/settings" className="sidebar-item">
             <FiSettings size={20} /> Settings
           </Link>
         </nav>
