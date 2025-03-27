@@ -4,7 +4,7 @@ import Sidebar from "../components/sidebar";
 const Home = () => {
   return (
     <div className="home-container">
-      <div className="relative min-h-screen flex">
+      <div className="container">
         {/* Sidebar */}
         <Sidebar />
 

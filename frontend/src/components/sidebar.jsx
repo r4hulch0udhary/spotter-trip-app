@@ -31,7 +31,7 @@ const Sidebar = () => {
           <Link to="/trip" className="sidebar-item">
             <FiMap size={20} /> Plan Trip
           </Link>
-          <Link to="/log-sheet" className="sidebar-item">
+          <Link to="/tripLogs" className="sidebar-item">
             <FiClipboard size={20} /> Log Sheet
           </Link>
           <Link to="/settings" className="sidebar-item">

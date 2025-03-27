@@ -4,3 +4,4 @@ env
 env/
 docs
 docs/
+node_modules

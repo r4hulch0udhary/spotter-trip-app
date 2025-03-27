@@ -6,19 +6,24 @@ import TripForm from "./pages/TripForm";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ELDLogPage from "./pages/ELDlog";
+import TripSummaryPage from "./pages/tripSummary";
 
 
 function App() {
   return (
     <Router>
       <Navbar />
-      <div className="container">
+      <div >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/trip" element={<TripForm />} />
+          <Route path="/tripLogs" element={<ELDLogPage />} />
+          <Route path="/tripSummary/:tripId" element={<TripSummaryPage />} />
           <Route path="/" element={<ProtectedRoute />}>
+            
             <Route index element={<Home />} />
           </Route>
         </Routes>
