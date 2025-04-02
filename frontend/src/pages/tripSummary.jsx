@@ -43,8 +43,10 @@ const TripSummaryPage = () => {
     const [trip, setTrip] = useState(null);
     const [routeCoordinates, setRouteCoordinates] = useState([]);
 
+    console.log(trip,'trip');
+    
     useEffect(() => {
-        fetch(`http://localhost::8000/api/trip-summary/${tripId}/`)
+        fetch(`http://localhost:8000/api/trip-summary/${tripId}/`)
             .then((res) => res.json())
             .then((data) => {
                 setTrip(data);
@@ -69,7 +71,7 @@ const TripSummaryPage = () => {
                     <div className="summary-column">
                         <div className="summary-item">
                             <span className="summary-icon">📍</span>
-                            <span className="summary-text"><strong>Start Location:</strong> {trip.pickup_city}</span>
+                            <span className="summary-text"><strong>Start Location:</strong> {trip.current_city}</span>
                         </div>
                         <div className="summary-item">
                             <span className="summary-icon">📦</span>
@@ -136,7 +138,7 @@ const TripSummaryPage = () => {
                     {/* Stops (Rest Stops & Fuel Stops) */}
                     {trip.fuel_stops?.map((stop, index) => (
                         <Marker key={index} position={[stop.latitude, stop.longitude]} icon={stop.stop_type === "fuel" ? fuelIcon : stopIcon}>
-                            <Popup>🛑 {stop.stop_type === "fuel" ? "Fuel Stop ⛽" : stop.stop_type} at {stop.city}</Popup>
+                            <Popup>🛑 {stop.stop_type === "fuel" ? `Fuel Stop ⛽: ${stop.name}` : stop.stop_type}</Popup>
                         </Marker>
                     ))}
                 </MapContainer>

@@ -18,7 +18,8 @@ ON_DUTY_LIMIT = 14
 BREAK_INTERVAL = 8
 BREAK_TIME = 0.5
 REST_TIME = 10
-FUEL_INTERVAL_MILES = 1000  
+FUEL_INTERVAL_MILES = 100  
+SEARCH_RADIUS_METERS = 16093  # 10 miles in meters
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -62,14 +63,6 @@ class TripAPIView(APIView):
 
     
     
-    def get_route(self, current, pickup, dropoff):
-        """Calculate route from current to pickup to dropoff using OSRM API"""
-        url = f"http://router.project-osrm.org/route/v1/driving/{current['lon']},{current['lat']};{pickup['lon']},{pickup['lat']};{dropoff['lon']},{dropoff['lat']}?overview=full&geometries=polyline&steps=true"
-        response = requests.get(url).json()
-
-        if response.get("routes"):
-            return response["routes"][0]  # Return first route
-        return None  
 
 
 
@@ -82,6 +75,15 @@ class TripSummaryAPIView(APIView):
             trip = Trip.objects.get(id=id)
             trip_data = TripSerializer(trip).data
 
+            # Get the current city name
+            current_city = self.get_city_name(trip.current_latitude, trip.current_longitude)
+            dropoff_city = self.get_city_name(trip.dropoff_latitude, trip.dropoff_longitude)
+            pickup_city = self.get_city_name(trip.pickup_latitude, trip.pickup_longitude)
+
+            trip_data["current_city"] = current_city  
+            trip_data["dropoff_city"] = dropoff_city  
+            trip_data["pickup_city"] = pickup_city
+
             if trip.route_data:
                 fuel_stops = self.get_fuel_stops(trip.route_data)
                 trip_data["fuel_stops"] = fuel_stops
@@ -89,38 +91,93 @@ class TripSummaryAPIView(APIView):
             return Response(trip_data, status=status.HTTP_200_OK)
         except Trip.DoesNotExist:
             return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-    def get_fuel_stops(self, route_data):
-        print("Route Data Legs:", route_data.get("legs"))  # Debugging print
 
-        """Determine fuel stops along the route based on distance."""
+    def get_city_name(self, latitude, longitude):
+        """Fetch city and county name from coordinates using OpenStreetMap Nominatim API."""
+        try:
+            url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitude}&lon={longitude}"
+            response = requests.get(url, headers={"User-Agent": "trip-planner"})
+            # print("Response:", response.text)  # Debugging print
+
+            if response.status_code == 200:
+                data = response.json()
+                address = data.get("address", {})
+
+                # Extract city and county from relevant fields
+                city = address.get("city") or address.get("town") or address.get("village")
+                county = address.get("county") or address.get("state_district")
+
+                # Combine them meaningfully
+                location_name = ""
+                if city:
+                    location_name += city
+                if county and county != city:  # Avoid duplication
+                    location_name += f", {county}"
+
+                return location_name if location_name else "Unknown Location"
+
+        except Exception as e:
+            print("Error fetching city name:", e)
+
+        return "Unknown Location"
+
+
+            
+    def get_fuel_stops(self, route_data):
+        """Find fuel stops along the route and fetch real fuel station names."""
         stops = []
         accumulated_distance = 0
 
-        for leg_index, leg in enumerate(route_data.get("legs", [])):  # Loop through legs
-            print(f"Leg {leg_index + 1} Steps:", leg.get("steps"))  # Debugging print
-            
-            for step_index, step in enumerate(leg.get("steps", [])):  # Loop through steps
+        for leg in route_data.get("legs", []):  
+            for step in leg.get("steps", []):  
                 distance_miles = step.get("distance", 0) / 1609  # Convert meters to miles
                 accumulated_distance += distance_miles
-
-                print(f"Step {step_index + 1}: Distance = {distance_miles:.2f} miles, Accumulated = {accumulated_distance:.2f} miles")
 
                 if accumulated_distance >= FUEL_INTERVAL_MILES:
                     maneuver = step.get("maneuver", {})
                     stop_location = maneuver.get("location", [])
 
-                    if len(stop_location) == 2:  # Ensure location has lat/lon
-                        stops.append({
-                            "stop_type": "fuel",
-                            "latitude": stop_location[1],
-                            "longitude": stop_location[0],
-                            "description": "Fuel stop"
-                        })
-                        accumulated_distance = 0  # Reset counter after stop
+                    if len(stop_location) == 2:  # Ensure valid lat/lon
+                        lat, lon = stop_location[1], stop_location[0]
+                        fuel_stations = self.find_nearby_fuel_stations(lat, lon)
 
-        print("Fuel Stops:", stops)  # Debugging print
+                        stops.extend(fuel_stations)  # Add fuel stations at this stop
+                        accumulated_distance = 0  # Reset counter
+
         return stops
+
+    def find_nearby_fuel_stations(self, lat, lon):
+        """Fetch nearby fuel stations using Overpass API and return names."""
+        overpass_url = "http://overpass-api.de/api/interpreter"
+        query = f"""
+        [out:json];
+        node(around:{SEARCH_RADIUS_METERS},{lat},{lon})["amenity"="fuel"];
+        out center;
+        """
+        try:
+            response = requests.get(overpass_url, params={"data": query}, headers={"User-Agent": "trip-planner"})
+            print(response.text, ">>>>>> Response from Overpass API")
+            data = response.json()
+
+            fuel_stations = []
+            for node in data.get("elements", []):
+                tags = node.get("tags", {})
+                station_name = tags.get("name") or tags.get("name:en") or tags.get("brand") or "Unnamed Fuel Station"
+
+                fuel_stations.append({
+                    "stop_type": "fuel",
+                    "latitude": node["lat"],
+                    "longitude": node["lon"],
+                    "name": station_name,
+                    "description": "Fuel Station"
+                })
+
+            print(fuel_stations, "<<<<< Fuel Stations Found")
+            return fuel_stations if fuel_stations else [{"stop_type": "fuel", "latitude": lat, "longitude": lon, "name": "No Nearby Fuel Station", "description": "No fuel station found"}]
+
+        except Exception as e:
+            print("Error fetching fuel stations:", e)
+            return [{"stop_type": "fuel", "latitude": lat, "longitude": lon, "name": "Error Fetching Fuel Stations", "description": "API Error"}]
 
 
 

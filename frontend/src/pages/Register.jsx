@@ -23,7 +23,7 @@ const Register = () => {
             return;
         }
         try {
-            await axios.post("http://localhost::8000/api/register/", {
+            await axios.post("http://localhost:8000/api/register/", {
                 username,
                 email,
                 password,
@@ -45,7 +45,7 @@ const Register = () => {
                     <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="Name" 
+                        placeholder="First Name" 
                         value={first_name} 
                         onChange={(e) => setFirst_Name(e.target.value)} 
                         required 
@@ -53,17 +53,15 @@ const Register = () => {
                     <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="Name" 
+                        placeholder="Last Name" 
                         value={last_name} 
                         onChange={(e) => setLast_Name(e.target.value)} 
                         required 
                     />
-
-
                     <input 
                         type="text" 
                         className="form-control" 
-                        placeholder="username" 
+                        placeholder="Username" 
                         value={username} 
                         onChange={(e) => setUsername(e.target.value)} 
                         required 
@@ -76,9 +74,6 @@ const Register = () => {
                         onChange={(e) => setEmail(e.target.value)} 
                         required 
                     />
-
-                   
-
                     <div className="password-field">
                         <input 
                             type={showPassword ? "text" : "password"} 
