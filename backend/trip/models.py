@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 class Trip(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -25,6 +26,8 @@ class Trip(models.Model):
     route_data = models.JSONField(null=True, blank=True)  # Full route data
 
     created_at = models.DateTimeField(auto_now_add=True)
+    start_time = models.DateTimeField(default=now)  # Add this line
+
 
     def __str__(self):
         return f"Trip: {self.pickup_city} → {self.dropoff_city}"

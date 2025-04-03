@@ -1,0 +1,108 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Sidebar from "../components/sidebar";
+
+const PastLogPage = () => {
+    const [trips, setTrips] = useState([]);
+    const [logs, setLogs] = useState([]);
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const tripsPerPage = 6; // Number of trips per page
+
+    useEffect(() => {
+        const token = localStorage.getItem("token"); // Ensure token is available
+
+        fetch(`http://localhost:8000/api/past-logs/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log(data, "data");
+            setTrips(data?.past_trips);
+            setLogs(data?.logs);
+        })
+        .catch(err => console.error("Error fetching past logs:", err));
+    }, []);
+
+    // Calculate the index range for pagination
+    const indexOfLastTrip = currentPage * tripsPerPage;
+    const indexOfFirstTrip = indexOfLastTrip - tripsPerPage;
+    const currentTrips = trips?.slice(indexOfFirstTrip, indexOfLastTrip);
+
+    // Handle pagination
+    const totalPages = Math.ceil(trips?.length / tripsPerPage);
+    
+    const nextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const prevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    return (
+        <div className="home-container">
+            <div className="container">
+                <Sidebar />
+                <h3 className="text-center mt-3">Past Trip Logs</h3>
+
+                {/* Table List View */}
+                <div className="table-responsive mt-4">
+                    <table className="table table-striped table-bordered">
+                        <thead className="table-dark">
+                            <tr>
+                                <th>Trip ID</th>
+                                <th>Pickup City</th>
+                                <th>Dropoff City</th>
+                                <th>Distance (km)</th>
+                                <th>Duration (hours)</th>
+                                <th>Start Time</th>
+                                {/* <th>Actions</th> */}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentTrips?.map((trip, index) => (
+                                <tr key={index}>
+                                    <td>{trip.id}</td>
+                                    <td>{trip.pickup_city}</td>
+                                    <td>{trip.dropoff_city}</td>
+                                    <td>{trip.distance_km}</td>
+                                    <td>{trip.duration_hours}</td>
+                                    <td>{new Date(trip.start_time).toLocaleString()}</td>
+                                    {/* <td>
+                                        <Link to={`/trip/${trip.id}`} className="btn btn-sm btn-primary">
+                                            View Details
+                                        </Link>
+                                    </td> */}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="d-flex justify-content-between mt-3">
+                    <button className="btn btn-secondary" onClick={prevPage} disabled={currentPage === 1}>
+                        ◀ Previous
+                    </button>
+                    <span>Page {currentPage} of {totalPages}</span>
+                    <button className="btn btn-secondary" onClick={nextPage} disabled={currentPage === totalPages}>
+                        Next ▶
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default PastLogPage;

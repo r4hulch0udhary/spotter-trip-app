@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from trip.auth import RegisterUserAPIView, LogoutAPIView
-from .views import  ELDLogAPIView, TripSummaryAPIView, TripAPIView
+from .views import  ELDLogAPIView, TripSummaryAPIView, TripAPIView,PastTripsAPIView
 
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path("trip/", TripAPIView.as_view(), name="plan_trip"),
     path('trip-summary/<int:id>/', TripSummaryAPIView.as_view(), name='trip-summary'),
     path('eld-logs/', ELDLogAPIView.as_view(), name='eld-logs'),
+    path('past-logs/', PastTripsAPIView.as_view(), name='eld-logs'),
 
 
 ]
