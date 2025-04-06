@@ -22,20 +22,33 @@ const TripSummaryPage = () => {
     const [routeCoordinates, setRouteCoordinates] = useState([]);
     const [loadingApi, setLoadingApi] = useState(false);
 
-    useEffect(() => {
-        fetch(`http://localhost:8000/api/trip-summary/${tripId}/`)
-            .then((res) => res.json())
-            .then((data) => {
-                setTrip(data);
-                if (data?.route_data?.geometry) {
-                    const decodedCoords = polyline.decode(data.route_data.geometry).map(([lat, lng]) => [lat, lng]);
-                    setRouteCoordinates(decodedCoords);
-                }
-            })
-            .catch((err) => {
-                console.error("Error fetching trip:", err);
-            });
-    }, [tripId]);
+useEffect(() => {
+    const token = localStorage.getItem("token"); // Adjust based on how you're storing the token
+
+    fetch(`http://localhost:8000/api/trip-summary/${tripId}/`, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error("Failed to fetch trip summary");
+            }
+            return res.json();
+        })
+        .then((data) => {
+            setTrip(data);
+            if (data?.route_data?.geometry) {
+                const decodedCoords = polyline.decode(data.route_data.geometry).map(([lat, lng]) => [lat, lng]);
+                setRouteCoordinates(decodedCoords);
+            }
+        })
+        .catch((err) => {
+            console.error("Error fetching trip:", err);
+        });
+}, [tripId]);
+
 
 
     // if (!trip) return <p className="text-center mt-5">Loading trip summary...</p>;

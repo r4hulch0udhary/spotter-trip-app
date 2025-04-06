@@ -10,14 +10,28 @@ const ELDLogPage = () => {
     const tripsPerPage = 5;
 
     useEffect(() => {
-        fetch(`http://localhost:8000/api/eld-logs/`)
-            .then(res => res.json())
+        const token = localStorage.getItem("token"); 
+
+        fetch(`http://localhost:8000/api/eld-logs/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch ELD logs");
+                }
+                return res.json();
+            })
             .then(data => {
                 setTrips(data?.trips || []);
                 setLogs(data?.logs || []);
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error("Error fetching ELD logs:", err));
     }, []);
+
 
     const indexOfLastTrip = currentPage * tripsPerPage;
     const indexOfFirstTrip = indexOfLastTrip - tripsPerPage;

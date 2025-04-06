@@ -82,9 +82,11 @@ from django.utils.timezone import make_aware
 
 
 class TripSummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, id, *args, **kwargs):
         try:
-            trip = Trip.objects.get(id=id)
+            trip = Trip.objects.get(id=id, user=request.user)
             trip_data = TripSerializer(trip).data
 
             # Get city names
@@ -298,16 +300,18 @@ class TripSummaryAPIView(APIView):
 
 
 class ELDLogAPIView(APIView):
+
+    permission_classes = [IsAuthenticated]
     def get(self, request, trip_id=None, *args, **kwargs):
         if trip_id:
             try:
-                trip = Trip.objects.get(id=trip_id)
+                trip = Trip.objects.get(id=id, user=request.user)
             except Trip.DoesNotExist:
                 return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
             
             trips = [trip]
         else:
-            trips = Trip.objects.all()
+            trips = Trip.objects.filter(user=request.user)
 
         if not trips:
             return Response({"error": "No trips found"}, status=status.HTTP_404_NOT_FOUND)
