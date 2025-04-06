@@ -6,9 +6,10 @@ import TripForm from "./pages/TripForm";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import ELDLogPage from "./pages/ELDlog";
+import ELDLogPage from "./pages/ELDlogTable";
 import TripSummaryPage from "./pages/tripSummary";
 import PastLogPage from "./pages/pastLogs";
+import ELDLog from "./pages/eldlogs";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/trip" element={<TripForm />} />
           <Route path="/tripLogs" element={<ELDLogPage />} />
           <Route path="/pastLogs" element={<PastLogPage />} />
+          <Route path="/eldlogs/:tripId" element={<ELDLog />} />
           <Route path="/tripSummary/:tripId" element={<TripSummaryPage />} />
           <Route path="/" element={<ProtectedRoute />}>
             

@@ -10,9 +10,9 @@ const PastLogPage = () => {
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const tripsPerPage = 6; // Number of trips per page
+  const token = localStorage.getItem("token");
 
     useEffect(() => {
-        const token = localStorage.getItem("token"); // Ensure token is available
 
         fetch(`http://localhost:8000/api/past-logs/`, {
             method: "GET",
@@ -57,10 +57,13 @@ const PastLogPage = () => {
                 <h3 className="text-center mt-3">Past Trip Logs</h3>
 
                 {/* Table List View */}
-                <div className="table-responsive mt-4">
-                    <table className="table table-striped table-bordered">
-                        <thead className="table-dark">
-                            <tr>
+
+                <div className="bg-white p-4 rounded shadow-sm">
+                    <div className="table-responsive">
+                        <table className="table table-borderless align-left text-wrap text-start text-break">
+
+                        <thead >
+                                    <tr className="fw-semibold text-secondary">
                                 <th>Trip ID</th>
                                 <th>Pickup City</th>
                                 <th>Dropoff City</th>
@@ -88,6 +91,7 @@ const PastLogPage = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
                 </div>
 
                 {/* Pagination Controls */}

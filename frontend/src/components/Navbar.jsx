@@ -16,11 +16,11 @@ const Navbar = () => {
                 <div className="navbar-login-register">
                     {!localStorage.getItem("token") ? (
                         <>
-                            <Link className="btn btn-primary mx-2" to="/login">Login</Link>
-                            <Link className="btn btn-success" to="/register">Register</Link>
+                            <Link className="login-btn btn btn-primary mx-2" to="/login">Login</Link>
+                            <Link className="login-btn btn btn-success" to="/register">Register</Link>
                         </>
                     ) : (
-                        <button className="btn btn-danger" onClick={handleLogout}>Logout</button>
+                        <button className="login-btn btn btn-danger" onClick={handleLogout}>Logout</button>
                     )}
                 </div>
             </div>

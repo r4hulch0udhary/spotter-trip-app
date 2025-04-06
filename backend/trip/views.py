@@ -19,7 +19,7 @@ ON_DUTY_LIMIT = 14
 BREAK_INTERVAL = 8
 BREAK_TIME = 0.5
 REST_TIME = 10
-FUEL_INTERVAL_MILES = 100  
+FUEL_INTERVAL_MILES = 1000  
 SEARCH_RADIUS_METERS = 16093  # 10 miles in meters
 
 
@@ -81,7 +81,6 @@ class TripAPIView(APIView):
 from django.utils.timezone import make_aware
 
 
-
 class TripSummaryAPIView(APIView):
     def get(self, request, id, *args, **kwargs):
         try:
@@ -95,81 +94,102 @@ class TripSummaryAPIView(APIView):
 
             if trip.route_data:
                 fuel_stops = self.get_fuel_stops(trip.route_data)
-                trip_data["fuel_stops"] = fuel_stops
+                trip_data["fuel_stops"] = fuel_stops if fuel_stops else []
 
                 # Calculate total travel time & distance with timestamps
-                total_time_hours, total_distance_km, stop_schedule = self.calculate_travel_time(trip.route_data, fuel_stops, trip.start_time)
+                total_time_hours, total_distance_km, stop_schedule, formatted_start_time = self.calculate_travel_time(trip.route_data, fuel_stops, trip.start_time,trip)
                 trip_data["total_travel_time"] = f"{total_time_hours:.2f} hours"
                 trip_data["total_distance"] = f"{total_distance_km:.2f} km"
-                trip_data["stop_schedule"] = stop_schedule  # Add detailed stop times
+                trip_data["stop_schedule"] = stop_schedule
+                trip_data["start_time"] = formatted_start_time
 
             return Response(trip_data, status=status.HTTP_200_OK)
         except Trip.DoesNotExist:
             return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    def calculate_travel_time(self, route_data, fuel_stops, start_time):
-        """Calculate total travel time including stops and provide a schedule of stops."""
+    def calculate_travel_time(self, route_data, fuel_stops, start_time, trip):
         total_distance_meters = sum(leg.get("distance", 0) for leg in route_data.get("legs", []))
-        total_distance_km = total_distance_meters / 1000  # Convert to km
+        total_distance_km = total_distance_meters / 1000
+        drive_time_hours = float(trip.duration_hours)  # Estimated from OSRM
 
-        # Estimate drive time (assuming average speed of 80 km/h)
-        drive_time_hours = total_distance_km / 80
-
-        # Add stop durations
         fuel_stop_time = len(fuel_stops) * 0.5  # 30 min per fuel stop
-        meal_time = 3  # 1 hour each for breakfast, lunch, and dinner
-        sleep_time = 12 if total_distance_km > 600 else 0  # Sleep stop for long trips
-        pickup_dropoff_time = 2  # 1 hour at pickup & drop-off
+        pickup_dropoff_time = 2  # 1 hour each
+        total_time_hours = drive_time_hours + fuel_stop_time + pickup_dropoff_time
 
-        # Total travel time
-        total_time_hours = drive_time_hours + fuel_stop_time + meal_time + sleep_time + pickup_dropoff_time
-
-        # Ensure start_time is a datetime object
-        if isinstance(start_time, str):
-            current_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-        else:
-            current_time = start_time  # Assume it's already a datetime object
-
-        # Convert to timezone-aware datetime if necessary
+        # Start time
+        current_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S") if isinstance(start_time, str) else start_time
         if current_time.tzinfo is None:
             current_time = make_aware(current_time)
+        formatted_start_time = current_time.strftime("%Y-%m-%d %I:%M %p")
 
-        # Calculate stop timestamps
-        stop_schedule = []
+        stop_schedule = [{"type": "Start", "time": formatted_start_time}]
+        current_time += timedelta(hours=1)
+        stop_schedule.append({"type": "Pickup", "time": current_time.strftime("%Y-%m-%d %I:%M %p")})
+        current_time += timedelta(hours=1)  # Handling time
 
-        # Add pickup time
-        stop_schedule.append({"type": "Pickup", "time": current_time.strftime("%Y-%m-%d %H:%M:%S")})
-        current_time += timedelta(hours=1)  # Add pickup duration
+        hours_driven = 0
+        sleep_accumulator = 0
+        total_time_elapsed = 0
 
-        # Add stops
-        drive_time_so_far = 0
+        # Step through the route and add breaks/sleep when thresholds are hit
+        for leg in route_data.get("legs", []):
+            for step in leg.get("steps", []):
+                distance_km = step["distance"] / 1000  # km
+                duration_hours = step["duration"] / 3600  # seconds to hours
+
+                hours_driven += duration_hours
+                sleep_accumulator += duration_hours
+                total_time_elapsed += duration_hours
+                current_time += timedelta(hours=duration_hours)
+
+                # Check for break
+                if hours_driven >= 8:
+                    lat, lon = step["maneuver"]["location"][1], step["maneuver"]["location"][0]
+                    stop_schedule.append({
+                        "type": "Break",
+                        "time": current_time.strftime("%Y-%m-%d %I:%M %p"),
+                        "latitude": lat,
+                        "longitude": lon
+                    })
+                    current_time += timedelta(minutes=30)
+                    total_time_elapsed += 0.5
+                    hours_driven = 0
+
+                # Check for sleep
+                if sleep_accumulator >= 11:
+                    lat, lon = step["maneuver"]["location"][1], step["maneuver"]["location"][0]
+                    stop_schedule.append({
+                        "type": "Sleep",
+                        "time": current_time.strftime("%Y-%m-%d %I:%M %p"),
+                        "latitude": lat,
+                        "longitude": lon
+                    })
+                    current_time += timedelta(hours=8)
+                    total_time_elapsed += 8
+                    sleep_accumulator = 0
+                    hours_driven = 0
+
+        # Add Fuel Stops
         for fuel_stop in fuel_stops:
-            drive_time_so_far += (fuel_stop.get("distance", 0) / 80)  # Use .get() to avoid KeyError
-            current_time += timedelta(hours=drive_time_so_far)
-            stop_schedule.append({"type": "Fuel Stop", "time": current_time.strftime("%Y-%m-%d %H:%M:%S")})
-            current_time += timedelta(minutes=30)  # Fuel stop time
+            stop_schedule.append({
+                "type": "Fuel Stop",
+                "time": current_time.strftime("%Y-%m-%d %I:%M %p"),
+                "latitude": fuel_stop["latitude"],
+                "longitude": fuel_stop["longitude"],
+                "name": fuel_stop["name"],
+                "description": fuel_stop["description"]
+            })
+            current_time += timedelta(minutes=30)
 
-        # Add meal times (assuming they happen at 8 AM, 1 PM, and 7 PM)
-        for meal_hour in [8, 13, 19]:
-            meal_datetime = current_time.replace(hour=meal_hour, minute=0, second=0)
-            stop_schedule.append({"type": "Meal", "time": meal_datetime.strftime("%Y-%m-%d %H:%M:%S")})
-            current_time += timedelta(hours=1)  # Each meal is 1 hour
+        # Drop-off at end
+        current_time += timedelta(hours=1)
+        stop_schedule.append({"type": "Drop-off", "time": current_time.strftime("%Y-%m-%d %I:%M %p")})
 
-        # Add sleep time if long trip
-        if sleep_time > 0:
-            current_time += timedelta(hours=drive_time_so_far)  # Drive before sleep
-            stop_schedule.append({"type": "Sleep", "time": current_time.strftime("%Y-%m-%d %H:%M:%S")})
-            current_time += timedelta(hours=12)  # Sleep duration
+        return total_time_hours, total_distance_km, stop_schedule, formatted_start_time
 
-        # Add drop-off time
-        current_time += timedelta(hours=1)  # Final travel time
-        stop_schedule.append({"type": "Drop-off", "time": current_time.strftime("%Y-%m-%d %H:%M:%S")})
-
-        return total_time_hours, total_distance_km, stop_schedule
 
 
     def get_city_name(self, latitude, longitude):
-        """Fetch city and county name from coordinates using OpenStreetMap Nominatim API."""
         try:
             url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={latitude}&lon={longitude}"
             response = requests.get(url, headers={"User-Agent": "trip-planner"})
@@ -192,7 +212,6 @@ class TripSummaryAPIView(APIView):
         return "Unknown Location"
 
     def get_fuel_stops(self, route_data):
-        """Find fuel stops along the route and fetch real fuel station names."""
         stops = []
         accumulated_distance = 0
 
@@ -210,55 +229,107 @@ class TripSummaryAPIView(APIView):
                         fuel_stations = self.find_nearby_fuel_stations(lat, lon)
 
                         stops.extend(fuel_stations)
-                        accumulated_distance = 0  
+                        accumulated_distance = 0
 
         return stops
+    
+    def get_drive_time_to_pickup(self, route_data, pickup_coords):
+        distance_to_pickup = 0
+        reached_pickup = False
+
+        for leg in route_data.get("legs", []):
+            for step in leg.get("steps", []):
+                end_location = step.get("maneuver", {}).get("location", [])
+                if end_location and abs(end_location[1] - pickup_coords[0]) < 0.01 and abs(end_location[0] - pickup_coords[1]) < 0.01:
+                    reached_pickup = True
+                    break
+                distance_to_pickup += step.get("distance", 0)
+            if reached_pickup:
+                break
+
+        distance_km = distance_to_pickup / 1000
+        time_hours = distance_km / 80  # assume 80 km/h for truck
+        return time_hours
+
 
     def find_nearby_fuel_stations(self, lat, lon):
-        """Fetch nearby fuel stations using Overpass API and return names."""
         overpass_url = "http://overpass-api.de/api/interpreter"
         query = f"""
         [out:json];
         node(around:{SEARCH_RADIUS_METERS},{lat},{lon})["amenity"="fuel"];
-        out center;
+        out center 1;
         """
         try:
             response = requests.get(overpass_url, params={"data": query}, headers={"User-Agent": "trip-planner"})
             print(response.text, ">>>>>> Response from Overpass API")
             data = response.json()
 
-            fuel_stations = []
-            for node in data.get("elements", []):
+            elements = data.get("elements", [])
+            if elements:
+                node = elements[0]  # Only use the first one
                 tags = node.get("tags", {})
                 station_name = tags.get("name") or tags.get("name:en") or tags.get("brand") or "Unnamed Fuel Station"
 
-                fuel_stations.append({
+                return [{
                     "stop_type": "fuel",
                     "latitude": node["lat"],
                     "longitude": node["lon"],
                     "name": station_name,
                     "description": "Fuel Station"
-                })
-
-            print(fuel_stations, "<<<<< Fuel Stations Found")
-            return fuel_stations if fuel_stations else [{"stop_type": "fuel", "latitude": lat, "longitude": lon, "name": "No Nearby Fuel Station", "description": "No fuel station found"}]
+                }]
+            else:
+                return [{
+                    "stop_type": "fuel",
+                    "latitude": lat,
+                    "longitude": lon,
+                    "name": "No Nearby Fuel Station",
+                    "description": "No fuel station found"
+                }]
 
         except Exception as e:
             print("Error fetching fuel stations:", e)
-            return [{"stop_type": "fuel", "latitude": lat, "longitude": lon, "name": "Error Fetching Fuel Stations", "description": "API Error"}]
-
+            return [{
+                "stop_type": "fuel",
+                "latitude": lat,
+                "longitude": lon,
+                "name": "Error Fetching Fuel Stations",
+                "description": "API Error"
+            }]
 
 
 class ELDLogAPIView(APIView):
-    def get(self, request, *args, **kwargs):
-        trips = Trip.objects.all()
+    def get(self, request, trip_id=None, *args, **kwargs):
+        if trip_id:
+            try:
+                trip = Trip.objects.get(id=trip_id)
+            except Trip.DoesNotExist:
+                return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            trips = [trip]
+        else:
+            trips = Trip.objects.all()
 
-        if not trips.exists():
+        if not trips:
             return Response({"error": "No trips found"}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({
-            "trips": TripSerializer(trips, many=True).data,
-        }, status=status.HTTP_200_OK)
+        enhanced_trips = []
+        for trip in trips:
+            trip_data = TripSerializer(trip).data
+
+            if trip.route_data:
+                fuel_stops = TripSummaryAPIView().get_fuel_stops(trip.route_data)
+                total_time_hours, total_distance_km, stop_schedule, formatted_start_time = TripSummaryAPIView().calculate_travel_time(
+                    trip.route_data, fuel_stops, trip.start_time, trip
+                )
+
+                trip_data["fuel_stops"] = fuel_stops
+                trip_data["stop_schedule"] = stop_schedule
+                trip_data["total_travel_time"] = f"{total_time_hours:.2f} hours"
+                trip_data["start_time"] = formatted_start_time
+
+            enhanced_trips.append(trip_data)
+
+        return Response({"trips": enhanced_trips}, status=status.HTTP_200_OK)
 
 
 

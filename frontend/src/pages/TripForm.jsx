@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import L from "leaflet";
@@ -15,7 +15,11 @@ const PlanTrip = () => {
   const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const [loadingPickup, setLoadingPickup] = useState(false);
+  const [loadingDropoff, setLoadingDropoff] = useState(false);
+  const [loadingApi, setLoadingApi] = useState(false);
 
+  
   useEffect(() => {
     if (!map) {
       const existingMap = L.DomUtil.get("map");
@@ -55,8 +59,8 @@ const PlanTrip = () => {
 
     try {
       const response = await fetch(url);
-      const data = await response.json();
-      return data.length > 0 ? { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) } : null;
+      const data = await response?.json();
+      return data?.length > 0 ? { lat: parseFloat(data[0]?.lat), lon: parseFloat(data[0]?.lon) } : null;
     } catch (error) {
       console.error(`Error fetching coordinates for ${city}:`, error);
       return null;
@@ -64,10 +68,12 @@ const PlanTrip = () => {
   };
 
   const handlePlanTrip = async () => {
-    if (!pickupCity.trim() || !dropoffCity.trim() || !cycleHours) {
+    if (!pickupCity?.trim() || !dropoffCity?.trim() || !cycleHours) {
       alert("Please fill all required fields.");
       return;
     }
+    setLoadingApi(true);
+
 
     try {
       const pickupCoords = await fetchCoordinates(pickupCity);
@@ -79,14 +85,14 @@ const PlanTrip = () => {
       }
 
       const tripData = {
-        current_latitude: currentCoords.lat,
-        current_longitude: currentCoords.lon,
-        pickup_city: pickupCity.trim(),
-        pickup_lat: pickupCoords.lat,
-        pickup_lon: pickupCoords.lon,
-        dropoff_city: dropoffCity.trim(),
-        dropoff_lat: dropoffCoords.lat,
-        dropoff_lon: dropoffCoords.lon,
+        current_latitude: currentCoords?.lat,
+        current_longitude: currentCoords?.lon,
+        pickup_city: pickupCity?.trim(),
+        pickup_lat: pickupCoords?.lat,
+        pickup_lon: pickupCoords?.lon,
+        dropoff_city: dropoffCity?.trim(),
+        dropoff_lat: dropoffCoords?.lat,
+        dropoff_lon: dropoffCoords?.lon,
         cycle_hours: Number(cycleHours),
       };
 
@@ -105,16 +111,19 @@ const PlanTrip = () => {
       }
     } catch (error) {
       console.error("Error planning trip:", error);
-    }
+    } finally {
+    setLoadingApi(false); // ✅ always hide loader after API call
+  }
   };
 
   // Fetch city suggestions from Nominatim API
-  const fetchSuggestions = async (query, setSuggestions) => {
+  const fetchSuggestions = async (query, setSuggestions, setLoading) => {
     if (!query.trim()) {
       setSuggestions([]);
       return;
     }
 
+    setLoading(true);
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=5`
@@ -124,30 +133,44 @@ const PlanTrip = () => {
     } catch (error) {
       console.error("Error fetching suggestions:", error);
       setSuggestions([]);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="home-container">
       <Sidebar />
+      {loadingApi && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-75" style={{ zIndex: 1050 }}>
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
       <div className="container plan-trip-container">
         <h2 className="text-2xl font-bold mb-4 text-center">Plan a Trip</h2>
-        <div className="row g-3 align-items-center">
-          <div className="col-md-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Current Location"
-              value={currentCoords.lat ? `Lat: ${currentCoords.lat}, Lon: ${currentCoords.lon}` : ""}
-              readOnly
-            />
-            <button className="btn btn-primary w-100 mt-2" onClick={fetchCurrentLocation}>
-              {currentCoords.lat ? "Location Set" : "Fetch Current Location"}
-            </button>
+        <div className="row">
+          <div className="col-md-4">
+            <div className="input-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Current Location"
+                value={currentCoords.lat ? `Lat: ${currentCoords.lat}, Lon: ${currentCoords.lon}` : ""}
+                readOnly
+                />
+              <div className="input-group-append mb-3">
+                <button  type="button" className="btn btn-primary w-100" onClick={fetchCurrentLocation}>
+                {currentCoords.lat ? "Location Set" : "Fetch Location"}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Pickup City Input with Autocomplete */}
-          <div className="col-md-3 position-relative">
+          <div className="col-md-4 position-relative">
             <input
               type="text"
               className="form-control"
@@ -155,9 +178,15 @@ const PlanTrip = () => {
               value={pickupCity}
               onChange={(e) => {
                 setPickupCity(e.target.value);
-                fetchSuggestions(e.target.value, setPickupSuggestions);
+                fetchSuggestions(e.target.value, setPickupSuggestions, setLoadingPickup);
+
               }}
             />
+            {loadingPickup && (
+                <div className="position-absolute top-0 end-0 me-2 mt-2">
+                  <div className="spinner-border spinner-border-sm text-primary" role="status" />
+                </div>
+            )}
             {pickupSuggestions.length > 0 && (
               <ul className="list-group position-absolute w-100 mt-1">
                 {pickupSuggestions.map((suggestion, index) => (
@@ -176,53 +205,59 @@ const PlanTrip = () => {
             )}
           </div>
 
-          {/* Drop-off City Input with Autocomplete */}
-          <div className="col-md-3 position-relative">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Drop-off City"
-              value={dropoffCity}
-              onChange={(e) => {
-                setDropoffCity(e.target.value);
-                fetchSuggestions(e.target.value, setDropoffSuggestions);
-              }}
-            />
-            {dropoffSuggestions.length > 0 && (
-              <ul className="list-group position-absolute w-100 mt-1">
-                {dropoffSuggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    className="list-group-item list-group-item-action"
-                    onClick={() => {
-                      setDropoffCity(suggestion.display_name);
-                      setDropoffSuggestions([]);
-                    }}
-                  >
-                    {suggestion.display_name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+            {/* Drop-off City Input with Autocomplete */}
+            <div className="col-md-4 position-relative">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Drop-off City"
+                value={dropoffCity}
+                onChange={(e) => {
+                  setDropoffCity(e.target.value);
+                fetchSuggestions(e.target.value, setDropoffSuggestions, setLoadingDropoff);
+                }}
+              />
 
-          <div className="col-md-3">
-            <input
-              type="number"
-              className="form-control"
-              placeholder="Cycle Hours"
-              value={cycleHours}
-              onChange={(e) => setCycleHours(e.target.value)}
-              max="70"
-            />
-          </div>
-
-          <div className="col-md-3">
-            <button className="btn btn-success w-100" onClick={handlePlanTrip}>
-              Plan Trip
-            </button>
-          </div>
+               {loadingDropoff && (
+                  <div className="position-absolute top-0 end-0 me-2 mt-2">
+                    <div className="spinner-border spinner-border-sm text-primary" role="status" />
+                  </div>
+              )}
+            
+              {dropoffSuggestions.length > 0 && (
+                <ul className="list-group position-absolute w-100 mt-1">
+                  {dropoffSuggestions.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      className="list-group-item list-group-item-action"
+                      onClick={() => {
+                        setDropoffCity(suggestion.display_name);
+                        setDropoffSuggestions([]);
+                      }}
+                    >
+                      {suggestion.display_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="col-md-3">
+              <input
+                type="number"
+                className="form-control"
+                placeholder="Cycle Hours"
+                value={cycleHours}
+                onChange={(e) => setCycleHours(e.target.value)}
+                max="70"
+              />
+            </div>
+            <div className="">
+              <button className="btn btn-success w-20 " onClick={handlePlanTrip}>
+                Plan Trip
+              </button>
+            </div>
         </div>
+
 
         <div id="map" className="w-100 h-64 mt-4 rounded shadow"></div>
       </div>

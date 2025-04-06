@@ -15,6 +15,7 @@ urlpatterns = [
     path('trip-summary/<int:id>/', TripSummaryAPIView.as_view(), name='trip-summary'),
     path('eld-logs/', ELDLogAPIView.as_view(), name='eld-logs'),
     path('past-logs/', PastTripsAPIView.as_view(), name='eld-logs'),
+    path('eld-logs/<int:trip_id>/', ELDLogAPIView.as_view()),  # for specific trip
 
 
 ]

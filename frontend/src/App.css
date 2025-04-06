@@ -118,6 +118,8 @@ input {
   cursor: pointer;
   border-radius: 5px;
   transition: background 0.3s ease-in-out;
+  width: 20%;
+  float: inline-end;
 }
 
 .btn:hover {
@@ -298,6 +300,23 @@ input {
   align-items: center;
   justify-content: center;
   text-align: center;
+  margin-top: 100px;
+}
+.summary-container {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  display: flex;
+  margin-top: 100px;
+}
+.login-btn{
+  width: 100%;
+}
+.login-container {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  display: flex;
   margin-top: 100px;
 }
 
@@ -521,7 +540,7 @@ input {
 
 /* Button */
 .plan-trip-container button {
-  width: 100%;
+  width: 20%;
   padding: 12px;
   background-color: #28a745;
   color: white;
@@ -633,4 +652,62 @@ input {
   .start-btn {
     font-size: 0.9rem;
   }
+}
+
+.w-20{
+  width: 20%;
+}
+
+.timeline {
+  position: relative;
+  margin-left: 20px;
+  padding-left: 20px;
+  border-left: 3px solid #0d6efd;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -11px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  border: 2px solid white;
+  z-index: 1;
+}
+
+.timeline-content {
+  padding-left: 10px;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 12px;
+}
+
+.timeline-marker.break {
+  background-color: orange;
+}
+
+.timeline-marker.sleep {
+  background-color: #6f42c1;
+}
+
+.timeline-marker.fuel-stop {
+  background-color: green;
+}
+
+.timeline-marker.pickup {
+  background-color: #198754;
+}
+
+.timeline-marker.drop-off {
+  background-color: red;
 }

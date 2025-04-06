@@ -23,7 +23,7 @@ const Sidebar = () => {
         animate={{ x: isOpen ? 0 : -250 }}
         transition={{ duration: 0.3 }}
       >
-        <h2 className="sidebar-title">Trip Planner</h2>
+        <h2 className="sidebar-title mt-5">Trip Planner</h2>
         <nav className="sidebar-nav">
           <Link to="/" className="sidebar-item">
             <FiHome size={20} /> Home
@@ -32,11 +32,12 @@ const Sidebar = () => {
             <FiMap size={20} /> Plan Trip
           </Link>
           <Link to="/tripLogs" className="sidebar-item">
-            <FiClipboard size={20} /> Log Sheet
+            <FiClipboard size={20} /> ELD Logs
           </Link>
-          <Link to="/settings" className="sidebar-item">
-            <FiSettings size={20} /> Settings
+          <Link to="/pastLogs" className="sidebar-item">
+            <FiClipboard size={20} /> Past Logs
           </Link>
+
         </nav>
       </motion.div>
     </div>
