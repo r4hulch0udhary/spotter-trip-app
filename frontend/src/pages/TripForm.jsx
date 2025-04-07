@@ -4,6 +4,8 @@ import axios from "axios";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Sidebar from "../components/sidebar";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PlanTrip = () => {
   const [currentCoords, setCurrentCoords] = useState({ lat: null, lon: null });
@@ -72,6 +74,12 @@ const PlanTrip = () => {
       alert("Please fill all required fields.");
       return;
     }
+
+    if (Number(cycleHours) > 70) {
+    toast.error("Cycle should not exceed 70 hours.");
+    return;
+    }
+    
     setLoadingApi(true);
 
 
@@ -80,7 +88,7 @@ const PlanTrip = () => {
       const dropoffCoords = await fetchCoordinates(dropoffCity);
 
       if (!pickupCoords || !dropoffCoords) {
-        alert("Could not fetch coordinates. Please enter valid city names.");
+        toast.error("Could not fetch coordinates. Please enter valid city names.");
         return;
       }
 
@@ -97,23 +105,27 @@ const PlanTrip = () => {
       };
 
       const response = await axios.post("http://localhost:8000/api/trip/", tripData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+      });      
 
-      if (response.data && response.data.id) {
-        navigate(`/tripSummary/${response.data.id}`);
-      } else {
-        alert("Trip created, but no trip ID returned.");
+        if (response.data && response.data.id) {
+          toast.success("Trip planned successfully!");
+          setTimeout(() => navigate(`/tripSummary/${response.data.id}`), 1000);
+        } else {
+          toast.warning("Trip created, but no ID returned.");
+        }
+    } catch (error) {      
+        console.error("Error planning trip:", error);
+        const errorMessage = error?.response?.data?.error
+        toast.error(errorMessage);
+
+      } finally {
+        setLoadingApi(false);
       }
-    } catch (error) {
-      console.error("Error planning trip:", error);
-    } finally {
-    setLoadingApi(false); // ✅ always hide loader after API call
-  }
   };
 
   // Fetch city suggestions from Nominatim API
@@ -141,6 +153,8 @@ const PlanTrip = () => {
 
   return (
     <div className="home-container">
+      <ToastContainer />
+      
       <Sidebar />
       {loadingApi && (
         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-75" style={{ zIndex: 1050 }}>

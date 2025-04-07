@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
     const [username, setUsername] = useState("");
@@ -11,16 +13,23 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:8000/api/login/", { username, password });
+            const res = await axios.post("http://localhost:8000/api/login/", {
+                username,
+                password,
+            });
             localStorage.setItem("token", res.data.access);
-            navigate("/");
+            toast.success("Login successful!");
+            setTimeout(() => {
+                navigate("/");
+            }, 1000);
         } catch (error) {
-            alert("Invalid credentials");
+            toast.error("Invalid credentials");
         }
     };
 
     return (
         <div className="login-container">
+            <ToastContainer />
             <div className="container mt-5">
                 <div className="row justify-content-center">
                     <div className="col-md-6">
@@ -55,9 +64,9 @@ const Login = () => {
                                     </button>
                                 </form>
                             </div>
-                        <p className="text-center mt-3">
-                            Don’t have an account? <a href="/register">Sign up here</a>
-                        </p>
+                            <p className="text-center mt-3">
+                                Don’t have an account? <a href="/register">Sign up here</a>
+                            </p>
                         </div>
                     </div>
                 </div>

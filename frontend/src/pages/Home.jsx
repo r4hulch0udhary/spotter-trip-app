@@ -2,12 +2,13 @@ import React from "react";
 import Sidebar from "../components/sidebar";
 import { motion } from "framer-motion";
 import "../pages/home/home.css"; // Optional custom styles
+import { ToastContainer } from "react-toastify";
 
 const Home = () => {
   return (
     <div className="d-flex">
+      <ToastContainer/>
       <Sidebar />
-
       <div className="flex-grow-1 position-relative vh-100 overflow-hidden">
         {/* Background Image */}
         <div

@@ -7,6 +7,8 @@ import Sidebar from "../components/sidebar";
 import polyline from "@mapbox/polyline";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Custom Icons
 const defaultIcon = new L.Icon({ iconUrl, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
@@ -66,6 +68,7 @@ useEffect(() => {
     return (
         
         <div className="summary-container">
+            <ToastContainer/>
             <Sidebar />
 
             <div className="container mt-4">

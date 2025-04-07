@@ -3,9 +3,10 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
-    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [first_name, setFirst_Name] = useState("");
     const [last_name, setLast_Name] = useState("");
@@ -17,27 +18,30 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setUsername(email);
         if (password !== confirmPassword) {
-            alert("Passwords do not match!");
+            toast.error("Passwords do not match!");
             return;
         }
         try {
             await axios.post("http://localhost:8000/api/register/", {
-                username: email, // using email as username
+                username: email,
                 email,
                 password,
                 first_name,
                 last_name,
             });
-            navigate("/login");
+            toast.success("Registered successfully!", {
+                onClose: () => navigate("/login"),
+                autoClose: 2000,
+            });
         } catch (error) {
-            alert("Registration failed");
+            toast.error("Registration failed");
         }
     };
 
     return (
         <div className="login-container">
+            <ToastContainer />
             <div className="container mt-5">
                 <div className="row justify-content-center">
                     <div className="col-md-6">
@@ -123,9 +127,9 @@ const Register = () => {
                                     </button>
                                 </form>
                             </div>
-                        <p className="text-center mt-3">
-                            Already have an account? <a href="/login">Login here</a>
-                        </p>
+                            <p className="text-center mt-3">
+                                Already have an account? <a href="/login">Login here</a>
+                            </p>
                         </div>
                     </div>
                 </div>
