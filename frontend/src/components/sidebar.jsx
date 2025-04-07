@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FiMenu, FiX, FiHome, FiMap, FiClipboard, FiSettings } from "react-icons/fi";
+import { FiMenu, FiX, FiHome, FiMap, FiClipboard } from "react-icons/fi";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);

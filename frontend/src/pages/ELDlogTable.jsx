@@ -5,7 +5,6 @@ import Sidebar from "../components/sidebar";
 
 const ELDLogPage = () => {
     const [trips, setTrips] = useState([]);
-    const [logs, setLogs] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const tripsPerPage = 5;
 
@@ -27,7 +26,6 @@ const ELDLogPage = () => {
             })
             .then(data => {
                 setTrips(data?.trips || []);
-                setLogs(data?.logs || []);
             })
             .catch(err => console.error("Error fetching ELD logs:", err));
     }, []);

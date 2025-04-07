@@ -24,7 +24,7 @@ const PlanTrip = () => {
   
   useEffect(() => {
     if (!map) {
-      const existingMap = L.DomUtil.get("map");
+      const existingMap = L.DomUtil?.get("map");
       if (existingMap && existingMap._leaflet_id) return;
 
       const newMap = L.map("map").setView([20, 78], 5);
@@ -34,11 +34,11 @@ const PlanTrip = () => {
 
       setMap(newMap);
     }
-  }, []);
+  }, [map]);
 
   const fetchCurrentLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
+      navigator?.geolocation?.getCurrentPosition(
         (position) => {
           setCurrentCoords({
             lat: position.coords.latitude,

@@ -19,51 +19,54 @@ const ELDLog = () => {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState(null);
 
-  const fetchELDLogs = async () => {
-    try {
-      const endpoint = tripId
-        ? `http://localhost:8000/api/eld-logs/${tripId}/`
-        : `http://localhost:8000/api/eld-logs/`;
+ 
 
-      const res = await axios.get(endpoint, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+    useEffect(() => {
+    const fetchELDLogs = async () => {
+        try {
+        const endpoint = tripId
+            ? `http://localhost:8000/api/eld-logs/${tripId}/`
+            : `http://localhost:8000/api/eld-logs/`;
 
-      const trips = res.data.trips || [];
-      const processed = trips.map((trip) => {
-        const stopSchedule = trip.stop_schedule || [];
-        const logData = stopSchedule.map((stop, i) => {
-          const timeStr = new Date(stop.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return {
-            time: timeStr,
-            rawTime: new Date(stop.time),
-            status: stop.type,
-            notes: `${stop.type} at ${stop.type === 'Pickup' ? trip.pickup_city : trip.dropoff_city}`,
-          };
+        const res = await axios.get(endpoint, {
+            headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
         });
 
-        return {
-          tripId: trip.id,
-          date: new Date(trip.start_time).toLocaleDateString(),
-          pickup: trip.pickup_city,
-          dropoff: trip.dropoff_city,
-          duration: trip.duration_hours,
-          logData,
-        };
-      });
+        const trips = res.data.trips || [];
+        const processed = trips.map((trip) => {
+            const stopSchedule = trip.stop_schedule || [];
+            const logData = stopSchedule.map((stop, i) => {
+            const timeStr = new Date(stop.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return {
+                time: timeStr,
+                rawTime: new Date(stop.time),
+                status: stop.type,
+                notes: `${stop.type} at ${stop.type === 'Pickup' ? trip.pickup_city : trip.dropoff_city}`,
+            };
+            });
 
-      setLogs(processed);
-    } catch (err) {
-      console.error(err);
-      setError('Failed to fetch ELD logs.');
-    }
-  };
+            return {
+            tripId: trip.id,
+            date: new Date(trip.start_time).toLocaleDateString(),
+            pickup: trip.pickup_city,
+            dropoff: trip.dropoff_city,
+            duration: trip.duration_hours,
+            logData,
+            };
+        });
 
-  useEffect(() => {
+        setLogs(processed);
+        } catch (err) {
+        console.error(err);
+        setError('Failed to fetch ELD logs.');
+        }
+    };
+
     fetchELDLogs();
-  }, [tripId]);
+    }, [tripId]);
+
 
 const drawGraph = (logData) => {
   const canvas = document.createElement('canvas');
@@ -203,10 +206,6 @@ const drawGraph = (logData) => {
 
 
 
-  const getX = (dateObj, canvasWidth) => {
-    const hours = dateObj?.getHours() + dateObj?.getMinutes() / 60;
-    return (canvasWidth / 24) * hours;
-  };
 
   const downloadLog = (tripId, data) => {
   const headers = ['Time', 'Status', 'Notes'];

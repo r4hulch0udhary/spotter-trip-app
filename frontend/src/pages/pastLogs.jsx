@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Sidebar from "../components/sidebar";
 
 const PastLogPage = () => {
     const [trips, setTrips] = useState([]);
-    const [logs, setLogs] = useState([]);
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const tripsPerPage = 6; // Number of trips per page
-  const token = localStorage.getItem("token");
-
+    
     useEffect(() => {
+        const token = localStorage.getItem("token");
 
         fetch(`http://localhost:8000/api/past-logs/`, {
             method: "GET",
@@ -25,7 +23,6 @@ const PastLogPage = () => {
         .then(data => {
             console.log(data, "data");
             setTrips(data?.past_trips);
-            setLogs(data?.logs);
         })
         .catch(err => console.error("Error fetching past logs:", err));
     }, []);

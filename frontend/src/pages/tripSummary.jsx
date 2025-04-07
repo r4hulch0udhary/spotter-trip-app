@@ -7,7 +7,7 @@ import Sidebar from "../components/sidebar";
 import polyline from "@mapbox/polyline";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
-import { toast, ToastContainer } from "react-toastify";
+import {  ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Custom Icons
@@ -22,7 +22,6 @@ const TripSummaryPage = () => {
     const { tripId } = useParams();
     const [trip, setTrip] = useState(null);
     const [routeCoordinates, setRouteCoordinates] = useState([]);
-    const [loadingApi, setLoadingApi] = useState(false);
 
 useEffect(() => {
     const token = localStorage.getItem("token"); // Adjust based on how you're storing the token
