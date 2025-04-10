@@ -11,7 +11,7 @@ const ELDLogPage = () => {
     useEffect(() => {
         const token = localStorage.getItem("token"); 
 
-        fetch(`http://localhost:8000/api/eld-logs/`, {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/eld-logs/`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

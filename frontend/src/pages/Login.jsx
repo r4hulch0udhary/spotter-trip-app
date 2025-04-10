@@ -9,11 +9,17 @@ const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+    console.log(import.meta.env,'rthdhf'); // Add this in your Login.jsx
+
+
+    // const backend = import.meta?.env?.VITE_BACKEND_URL
+    // console.log(backend,'import.meta.env.VITE_BACKEND_URL');
+    // const backendURL = import.meta.env.VITE_BACKEND_URL;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post("http://localhost:8000/api/login/", {
+            const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/login/`, {
                 username,
                 password,
             });

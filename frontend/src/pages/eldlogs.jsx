@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 import Sidebar from '../components/sidebar';
+import { ToastContainer, toast } from "react-toastify";
 
 const eldRows = ['Start', 'PickUp', 'Break', 'Dropoff'];
 
@@ -17,7 +18,6 @@ const statusRowMap = {
 const ELDLog = () => {
   const { tripId } = useParams();
   const [logs, setLogs] = useState([]);
-  const [error, setError] = useState(null);
 
  
 
@@ -25,8 +25,8 @@ const ELDLog = () => {
     const fetchELDLogs = async () => {
         try {
         const endpoint = tripId
-            ? `http://localhost:8000/api/eld-logs/${tripId}/`
-            : `http://localhost:8000/api/eld-logs/`;
+            ? `${process.env.REACT_APP_BACKEND_URL}/api/eld-logs/${tripId}/`
+            : `${process.env.REACT_APP_BACKEND_URL}/api/eld-logs/`;
 
         const res = await axios.get(endpoint, {
             headers: {
@@ -60,7 +60,7 @@ const ELDLog = () => {
         setLogs(processed);
         } catch (err) {
         console.error(err);
-        setError('Failed to fetch ELD logs.');
+        toast.error('Failed to fetch ELD logs.');
         }
     };
 
@@ -224,11 +224,10 @@ const drawGraph = (logData) => {
 
   return (
     <div className="home-container">
+      <ToastContainer />
       <Sidebar />
       <div className="container">
         <h2 className="mb-4">📋 ELD Log Sheets</h2>
-        {error && <div className="alert alert-danger">{error}</div>}
-
         {logs.map((log, idx) => (
           <div className="card mb-5 shadow" key={idx}>
             <div className="card-header bg-primary text-white">

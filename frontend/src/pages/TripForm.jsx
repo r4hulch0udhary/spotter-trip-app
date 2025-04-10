@@ -27,7 +27,7 @@ const PlanTrip = () => {
       const existingMap = L.DomUtil?.get("map");
       if (existingMap && existingMap._leaflet_id) return;
 
-      const newMap = L.map("map").setView([20, 78], 5);
+      const newMap = L.map("map").setView([37.0902, -95.7129], 4); // Center on USA with zoom level 4
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(newMap);
@@ -47,12 +47,12 @@ const PlanTrip = () => {
         },
         (error) => {
           console.error("Geolocation Error:", error);
-          alert("Geolocation failed. Please enter a pickup city manually.");
+          toast.error("Geolocation failed. Please enter a pickup city manually.");
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
+      toast.error("Geolocation is not supported by your browser.");
     }
   };
 
@@ -71,7 +71,7 @@ const PlanTrip = () => {
 
   const handlePlanTrip = async () => {
     if (!pickupCity?.trim() || !dropoffCity?.trim() || !cycleHours) {
-      alert("Please fill all required fields.");
+      toast.error("Please fill all required fields.");
       return;
     }
 
@@ -104,7 +104,7 @@ const PlanTrip = () => {
         cycle_hours: Number(cycleHours),
       };
 
-      const response = await axios.post("http://localhost:8000/api/trip/", tripData, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/trip/`, tripData, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -196,26 +196,28 @@ const PlanTrip = () => {
 
               }}
             />
-            {loadingPickup && (
-                <div className="position-absolute top-0 end-0 me-2 mt-2">
-                  <div className="spinner-border spinner-border-sm text-primary" role="status" />
-                </div>
-            )}
-            {pickupSuggestions.length > 0 && (
-              <ul className="list-group position-absolute w-100 mt-1">
-                {pickupSuggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    className="list-group-item list-group-item-action"
-                    onClick={() => {
-                      setPickupCity(suggestion.display_name);
-                      setPickupSuggestions([]);
-                    }}
-                  >
-                    {suggestion.display_name}
-                  </li>
-                ))}
-              </ul>
+            {(loadingPickup || pickupSuggestions.length > 0) && (
+              <div className="position-absolute w-100 bg-white border rounded mt-1 z-3">
+                {loadingPickup && (
+                  <div className="d-flex justify-content-center py-2">
+                    <div className="spinner-border spinner-border-sm text-primary" role="status" />
+                  </div>
+                )}
+                <ul className="list-group list-group-flush">
+                  {pickupSuggestions.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      className="list-group-item list-group-item-action"
+                      onClick={() => {
+                        setPickupCity(suggestion.display_name);
+                        setPickupSuggestions([]);
+                      }}
+                    >
+                      {suggestion.display_name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
@@ -232,28 +234,29 @@ const PlanTrip = () => {
                 }}
               />
 
-               {loadingDropoff && (
-                  <div className="position-absolute top-0 end-0 me-2 mt-2">
-                    <div className="spinner-border spinner-border-sm text-primary" role="status" />
+               {(loadingDropoff || dropoffSuggestions.length > 0) && (
+                  <div className="position-absolute w-100 bg-white border rounded mt-1 z-3">
+                    {loadingDropoff && (
+                      <div className="d-flex justify-content-center py-2">
+                        <div className="spinner-border spinner-border-sm text-primary" role="status" />
+                      </div>
+                    )}
+                    <ul className="list-group list-group-flush">
+                      {dropoffSuggestions.map((suggestion, index) => (
+                        <li
+                          key={index}
+                          className="list-group-item list-group-item-action"
+                          onClick={() => {
+                            setDropoffCity(suggestion.display_name);
+                            setDropoffSuggestions([]);
+                          }}
+                        >
+                          {suggestion.display_name}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-              )}
-            
-              {dropoffSuggestions.length > 0 && (
-                <ul className="list-group position-absolute w-100 mt-1">
-                  {dropoffSuggestions.map((suggestion, index) => (
-                    <li
-                      key={index}
-                      className="list-group-item list-group-item-action"
-                      onClick={() => {
-                        setDropoffCity(suggestion.display_name);
-                        setDropoffSuggestions([]);
-                      }}
-                    >
-                      {suggestion.display_name}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                )}
             </div>
             <div className="col-md-3">
               <input

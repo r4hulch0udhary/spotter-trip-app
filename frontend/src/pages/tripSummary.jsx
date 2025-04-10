@@ -26,7 +26,7 @@ const TripSummaryPage = () => {
 useEffect(() => {
     const token = localStorage.getItem("token"); // Adjust based on how you're storing the token
 
-    fetch(`http://localhost:8000/api/trip-summary/${tripId}/`, {
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/trip-summary/${tripId}/`, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,

@@ -12,7 +12,7 @@ const PastLogPage = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
 
-        fetch(`http://localhost:8000/api/past-logs/`, {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/past-logs/`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
