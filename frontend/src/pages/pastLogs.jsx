@@ -7,7 +7,7 @@ const PastLogPage = () => {
     
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const tripsPerPage = 6; // Number of trips per page
+    const tripsPerPage = 10; // Number of trips per page
     
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -60,7 +60,7 @@ const PastLogPage = () => {
                         <table className="table table-borderless align-left text-wrap text-start text-break">
 
                         <thead >
-                                    <tr className="fw-semibold text-secondary">
+                                <tr className="fw-semibold text-secondary">
                                 <th>Trip ID</th>
                                 <th>Pickup City</th>
                                 <th>Dropoff City</th>
@@ -92,6 +92,7 @@ const PastLogPage = () => {
                 </div>
 
                 {/* Pagination Controls */}
+                {trips.length > 0 && totalPages > 1 && (
                 <div className="d-flex justify-content-between mt-3">
                     <button className="btn btn-secondary" onClick={prevPage} disabled={currentPage === 1}>
                         ◀ Previous
@@ -101,6 +102,7 @@ const PastLogPage = () => {
                         Next ▶
                     </button>
                 </div>
+                )}
             </div>
         </div>
     );

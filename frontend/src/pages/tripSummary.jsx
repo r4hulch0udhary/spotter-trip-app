@@ -81,7 +81,7 @@ useEffect(() => {
                                 <p className="card-text mb-1"><strong>📍 Start Location:</strong> {trip.current_city}</p>
                                 <p className="card-text mb-1"><strong>📦 Pickup:</strong> {trip.pickup_city}</p>
                                 <p className="card-text mb-1"><strong>🏁 Drop-off:</strong> {trip.dropoff_city}</p>
-                                <p className="card-text"><strong>📏 Total Distance:</strong> {trip.distance_km} km</p>
+                                <p className="card-text"><strong>📏 Total Distance:</strong> {trip.distance_km?.toFixed(1)} km</p>
                             </div>
                         </div>
                     </div>

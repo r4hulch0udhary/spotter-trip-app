@@ -263,7 +263,6 @@ class TripSummaryAPIView(APIView):
         """
         try:
             response = requests.get(overpass_url, params={"data": query}, headers={"User-Agent": "trip-planner"})
-            print(response.text, ">>>>>> Response from Overpass API")
             data = response.json()
 
             elements = data.get("elements", [])
@@ -305,7 +304,7 @@ class ELDLogAPIView(APIView):
     def get(self, request, trip_id=None, *args, **kwargs):
         if trip_id:
             try:
-                trip = Trip.objects.get(id=id, user=request.user)
+                trip = Trip.objects.get(id=trip_id, user=request.user)
             except Trip.DoesNotExist:
                 return Response({"error": "Trip not found"}, status=status.HTTP_404_NOT_FOUND)
             
@@ -319,17 +318,34 @@ class ELDLogAPIView(APIView):
         enhanced_trips = []
         for trip in trips:
             trip_data = TripSerializer(trip).data
+           
+            trip_data["current_city"] = TripSummaryAPIView().get_city_name(trip.current_latitude, trip.current_longitude)
+            break_points = []
+            sleep_points = []
+
 
             if trip.route_data:
                 fuel_stops = TripSummaryAPIView().get_fuel_stops(trip.route_data)
                 total_time_hours, total_distance_km, stop_schedule, formatted_start_time = TripSummaryAPIView().calculate_travel_time(
                     trip.route_data, fuel_stops, trip.start_time, trip
                 )
+                for stop in stop_schedule:
+                    if stop["type"] == "Break":
+                        city = TripSummaryAPIView().get_city_name(stop["latitude"], stop["longitude"])
+                        if city:
+                            break_points.append(city)
+                    if stop["type"] == "Sleep":
+                        city = TripSummaryAPIView().get_city_name(stop["latitude"], stop["longitude"])
+                        if city:
+                            sleep_points.append(city)
 
                 trip_data["fuel_stops"] = fuel_stops
                 trip_data["stop_schedule"] = stop_schedule
                 trip_data["total_travel_time"] = f"{total_time_hours:.2f} hours"
                 trip_data["start_time"] = formatted_start_time
+                trip_data["break_points"] = break_points if break_points else []
+                trip_data["sleep_points"] = sleep_points if sleep_points else []
+
 
             enhanced_trips.append(trip_data)
 

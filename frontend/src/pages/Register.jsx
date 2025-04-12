@@ -84,17 +84,17 @@ const Register = () => {
                                     </div>
                                     <div className="form-group mb-3">
                                         <label>Password</label>
-                                        <div className="input-group">
+                                        <div className="position-relative">
                                             <input
                                                 type={showPassword ? "text" : "password"}
-                                                className="form-control"
+                                                className="form-control pe-5"
                                                 placeholder="Enter password"
                                                 value={password}
                                                 onChange={(e) => setPassword(e.target.value)}
                                                 required
                                             />
                                             <span
-                                                className="input-group-text"
+                                                className="position-absolute top-50 translate-middle-y end-0 me-3"
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 style={{ cursor: "pointer" }}
                                             >
@@ -104,17 +104,17 @@ const Register = () => {
                                     </div>
                                     <div className="form-group mb-4">
                                         <label>Confirm Password</label>
-                                        <div className="input-group">
+                                        <div className="position-relative">
                                             <input
                                                 type={showConfirmPassword ? "text" : "password"}
-                                                className="form-control"
+                                                className="form-control pe-5"
                                                 placeholder="Confirm password"
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                                 required
                                             />
                                             <span
-                                                className="input-group-text"
+                                                className="position-absolute top-50 translate-middle-y end-0 me-3"
                                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                 style={{ cursor: "pointer" }}
                                             >

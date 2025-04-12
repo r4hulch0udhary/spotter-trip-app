@@ -6,10 +6,13 @@ import Sidebar from "../components/sidebar";
 const ELDLogPage = () => {
     const [trips, setTrips] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [loadingApi, setLoadingApi] = useState(true);
+
     const tripsPerPage = 5;
 
     useEffect(() => {
         const token = localStorage.getItem("token"); 
+        setLoadingApi(true); // Start loader
 
         fetch(`${process.env.REACT_APP_BACKEND_URL}/api/eld-logs/`, {
             method: "GET",
@@ -27,8 +30,12 @@ const ELDLogPage = () => {
             .then(data => {
                 setTrips(data?.trips || []);
             })
-            .catch(err => console.error("Error fetching ELD logs:", err));
+            .catch(err => console.error("Error fetching ELD logs:", err))
+            .finally(() => {
+                setLoadingApi(false); // Stop loader
+            });
     }, []);
+
 
 
     const indexOfLastTrip = currentPage * tripsPerPage;
@@ -46,8 +53,16 @@ const ELDLogPage = () => {
     
 
     return (
-    <div className="home-container d-flex">
+        <div className="home-container d-flex">
+            
             <Sidebar />
+            {loadingApi && (
+                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-75" style={{ zIndex: 1050 }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+                </div>
+            )}
 
             <div className="flex-grow-1 p-4" style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
                 <div className="container-fluid">

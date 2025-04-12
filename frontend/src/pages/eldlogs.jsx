@@ -18,54 +18,92 @@ const statusRowMap = {
 const ELDLog = () => {
   const { tripId } = useParams();
   const [logs, setLogs] = useState([]);
+  const [loadingApi, setLoadingApi] = useState(true);
 
  
 
     useEffect(() => {
-    const fetchELDLogs = async () => {
+      const fetchELDLogs = async () => {
         try {
-        const endpoint = tripId
+          const endpoint = tripId
             ? `${process.env.REACT_APP_BACKEND_URL}/api/eld-logs/${tripId}/`
             : `${process.env.REACT_APP_BACKEND_URL}/api/eld-logs/`;
 
-        const res = await axios.get(endpoint, {
+          const res = await axios.get(endpoint, {
             headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
-        });
+          });
 
-        const trips = res.data.trips || [];
-        const processed = trips.map((trip) => {
+          const trips = res.data.trips || [];
+          console.log(trips,'vtrips');
+          
+          const processed = trips.map((trip) => {
             const stopSchedule = trip.stop_schedule || [];
+            let breakIndex = 0;
+            let sleepIndex = 0;
             const logData = stopSchedule.map((stop, i) => {
-            const timeStr = new Date(stop.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            return {
+              const timeStr = new Date(stop.time).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              });
+
+              let notes = '';
+
+              switch (stop.type) {
+                case 'Start':
+                  notes = `Start at ${trip.current_city}`;
+                  break;
+                case 'Pickup':
+                  notes = `Pickup at ${trip.pickup_city}`;
+                  break;
+                case 'Drop-off':
+                case 'Dropoff':
+                  notes = `Drop-off at ${trip.dropoff_city}`;
+                  break;
+                case 'Break':
+                  notes = `Break at ${trip.break_points?.[breakIndex] || 'Unknown break point'}`;
+                  breakIndex++;
+                  break;
+                case 'Sleep':
+                  notes = `Sleep at ${trip.sleep_points?.[sleepIndex] || 'Unknown sleep point'}`;
+                  sleepIndex++;
+                  break;
+                default:
+                  notes = 'On route';
+              }
+
+              return {
                 time: timeStr,
                 rawTime: new Date(stop.time),
                 status: stop.type,
-                notes: `${stop.type} at ${stop.type === 'Pickup' ? trip.pickup_city : trip.dropoff_city}`,
-            };
+                notes,
+              };
             });
 
             return {
-            tripId: trip.id,
-            date: new Date(trip.start_time).toLocaleDateString(),
-            pickup: trip.pickup_city,
-            dropoff: trip.dropoff_city,
-            duration: trip.duration_hours,
-            logData,
+              tripId: trip.id,
+              date: new Date(trip.start_time).toLocaleDateString(),
+              start: trip.current_city,
+              pickup: trip.pickup_city,
+              dropoff: trip.dropoff_city,
+              duration: trip.duration_hours,
+              logData,
             };
-        });
+          });
 
-        setLogs(processed);
+          setLogs(processed);
         } catch (err) {
-        console.error(err);
-        toast.error('Failed to fetch ELD logs.');
+          console.error(err);
+          toast.error('Failed to fetch ELD logs.');
+        } finally {
+          setLoadingApi(false); // ✅ Ensure this runs regardless of success or failure
         }
-    };
+      };
 
-    fetchELDLogs();
+      fetchELDLogs();
     }, [tripId]);
+
 
 
 const drawGraph = (logData) => {
@@ -226,6 +264,13 @@ const drawGraph = (logData) => {
     <div className="home-container">
       <ToastContainer />
       <Sidebar />
+      {loadingApi && (
+          <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-75" style={{ zIndex: 1050 }}>
+          <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+          </div>
+          </div>
+      )}
       <div className="container">
         <h2 className="mb-4">📋 ELD Log Sheets</h2>
         {logs.map((log, idx) => (
@@ -234,7 +279,7 @@ const drawGraph = (logData) => {
               Trip #{log.tripId} — {log.date}
             </div>
             <div className="card-body">
-              <p><strong>Route:</strong> {log.pickup} ➔ {log.dropoff}</p>
+              <p><strong>Route:</strong>{log.start} ➔ {log.pickup} ➔ {log.dropoff}</p>
               <p><strong>Total Duration:</strong> {Number(log.duration).toFixed(2)} hrs</p>
 
               <h5 className="mt-4">🗂 Daily Log Graph</h5>

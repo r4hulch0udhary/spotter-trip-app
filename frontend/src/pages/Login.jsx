@@ -4,17 +4,14 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    console.log(import.meta.env,'rthdhf'); // Add this in your Login.jsx
+    const [showPassword, setShowPassword] = useState(false);
 
-
-    // const backend = import.meta?.env?.VITE_BACKEND_URL
-    // console.log(backend,'import.meta.env.VITE_BACKEND_URL');
-    // const backendURL = import.meta.env.VITE_BACKEND_URL;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -56,14 +53,23 @@ const Login = () => {
                                     </div>
                                     <div className="form-group mb-4">
                                         <label>Password</label>
-                                        <input
-                                            type="password"
-                                            className="form-control"
-                                            placeholder="Enter password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
-                                        />
+                                        <div className="position-relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                className="form-control pe-5"
+                                                placeholder="Enter password"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                required
+                                            />
+                                            <span
+                                                className="position-absolute top-50 translate-middle-y end-0 me-3"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                            </span>
+                                        </div>
                                     </div>
                                     <button type="submit" className="btn btn-primary w-100">
                                         Login

@@ -75,13 +75,19 @@ const PlanTrip = () => {
       return;
     }
 
-    if (Number(cycleHours) > 70) {
-    toast.error("Cycle should not exceed 70 hours.");
-    return;
-    }
-    
-    setLoadingApi(true);
+    const cycle = Number(cycleHours);
 
+    if (isNaN(cycle) || cycle <= 0 || cycle > 70) {
+      toast.error("Cycle hours must be a number between 1 and 70.");
+      return;
+    }
+
+    if (pickupCity.trim().toLowerCase() === dropoffCity.trim().toLowerCase()) {
+      toast.error("Pickup and Drop-off cities cannot be the same.");
+      return; 
+    }
+
+    setLoadingApi(true);
 
     try {
       const pickupCoords = await fetchCoordinates(pickupCity);
@@ -101,32 +107,32 @@ const PlanTrip = () => {
         dropoff_city: dropoffCity?.trim(),
         dropoff_lat: dropoffCoords?.lat,
         dropoff_lon: dropoffCoords?.lon,
-        cycle_hours: Number(cycleHours),
+        cycle_hours: cycle,
       };
 
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/trip/`, tripData, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-      });      
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
 
-        if (response.data && response.data.id) {
-          toast.success("Trip planned successfully!");
-          setTimeout(() => navigate(`/tripSummary/${response.data.id}`), 1000);
-        } else {
-          toast.warning("Trip created, but no ID returned.");
-        }
-    } catch (error) {      
-        console.error("Error planning trip:", error);
-        const errorMessage = error?.response?.data?.error
-        toast.error(errorMessage);
-
-      } finally {
-        setLoadingApi(false);
+      if (response.data && response.data.id) {
+        toast.success("Trip planned successfully!");
+        setTimeout(() => navigate(`/tripSummary/${response.data.id}`), 1000);
+      } else {
+        toast.warning("Trip created, but no ID returned.");
       }
+    } catch (error) {
+      console.error("Error planning trip:", error);
+      const errorMessage = error?.response?.data?.error;
+      toast.error(errorMessage || "An error occurred while planning the trip.");
+    } finally {
+      setLoadingApi(false);
+    }
   };
+
 
   // Fetch city suggestions from Nominatim API
   const fetchSuggestions = async (query, setSuggestions, setLoading) => {
@@ -175,7 +181,7 @@ const PlanTrip = () => {
                 value={currentCoords.lat ? `Lat: ${currentCoords.lat}, Lon: ${currentCoords.lon}` : ""}
                 readOnly
                 />
-              <div className="input-group-append mb-3">
+              <div className="input-group-append">
                 <button  type="button" className="btn btn-primary w-100" onClick={fetchCurrentLocation}>
                 {currentCoords.lat ? "Location Set" : "Fetch Location"}
                 </button>
@@ -265,7 +271,8 @@ const PlanTrip = () => {
                 placeholder="Cycle Hours"
                 value={cycleHours}
                 onChange={(e) => setCycleHours(e.target.value)}
-                max="70"
+                max={70}
+                min={0}
               />
             </div>
             <div className="">
