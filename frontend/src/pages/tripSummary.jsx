@@ -41,7 +41,7 @@ useEffect(() => {
         .then((data) => {
             setTrip(data);
             if (data?.route_data?.geometry) {
-                const decodedCoords = polyline.decode(data.route_data.geometry).map(([lat, lng]) => [lat, lng]);
+                const decodedCoords = polyline?.decode(data?.route_data?.geometry).map(([lat, lng]) => [lat, lng]);
                 setRouteCoordinates(decodedCoords);
             }
         })
@@ -50,10 +50,6 @@ useEffect(() => {
         });
 }, [tripId]);
 
-
-
-    // if (!trip) return <p className="text-center mt-5">Loading trip summary...</p>;
-    console.log(trip,'trip');
     if (!trip) {
         return (
             <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-75" style={{ zIndex: 1050 }}>
@@ -125,29 +121,29 @@ useEffect(() => {
                         <h5 className="card-title">Trip Route</h5>
                         <div className="map-responsive" style={{ height: "500px", width: "100%" }}>
                             <MapContainer
-                                center={routeCoordinates.length > 0 ? routeCoordinates[0] : [trip.pickup_latitude, trip.pickup_longitude]}
+                                center={routeCoordinates?.length > 0 ? routeCoordinates[0] : [trip?.pickup_latitude, trip?.pickup_longitude]}
                                 zoom={6}
                                 style={{ height: "100%", width: "100%" }}
                             >
                                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                                {routeCoordinates.length > 1 && (
+                                {routeCoordinates?.length > 1 && (
                                     <Polyline positions={routeCoordinates} color="blue" />
                                 )}
-                                {trip.current_latitude && trip.current_longitude && (
-                                    <Marker position={[trip.current_latitude, trip.current_longitude]} icon={defaultIcon}>
+                                {trip?.current_latitude && trip?.current_longitude && (
+                                    <Marker position={[trip?.current_latitude, trip?.current_longitude]} icon={defaultIcon}>
                                         <Popup>🚛 Current Location</Popup>
                                     </Marker>
                                 )}
-                                <Marker position={[trip.pickup_latitude, trip.pickup_longitude]} icon={pickupIcon}>
-                                    <Popup>📦 Pickup: {trip.pickup_city}</Popup>
+                                <Marker position={[trip?.pickup_latitude, trip?.pickup_longitude]} icon={pickupIcon}>
+                                    <Popup>📦 Pickup: {trip?.pickup_city}</Popup>
                                 </Marker>
-                                <Marker position={[trip.dropoff_latitude, trip.dropoff_longitude]} icon={dropoffIcon}>
-                                    <Popup>🏁 Drop-off: {trip.dropoff_city}</Popup>
+                                <Marker position={[trip?.dropoff_latitude, trip?.dropoff_longitude]} icon={dropoffIcon}>
+                                    <Popup>🏁 Drop-off: {trip?.dropoff_city}</Popup>
                                 </Marker>
 
                                 {/* Mark fuel, break, sleep stops */}
                                 {trip.stop_schedule?.map((stop, index) => {
-                                    if (stop.latitude && stop.longitude) {
+                                    if (stop?.latitude && stop?.longitude) {
                                         let icon = null;
                                         let popupText = "";
 

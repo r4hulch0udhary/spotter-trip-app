@@ -120,7 +120,7 @@ const PlanTrip = () => {
 
       if (response.data && response.data.id) {
         toast.success("Trip planned successfully!");
-        setTimeout(() => navigate(`/tripSummary/${response.data.id}`), 1000);
+        setTimeout(() => navigate(`/tripSummary/${response?.data?.id}`), 1000);
       } else {
         toast.warning("Trip created, but no ID returned.");
       }
@@ -178,12 +178,12 @@ const PlanTrip = () => {
                 type="text"
                 className="form-control"
                 placeholder="Current Location"
-                value={currentCoords.lat ? `Lat: ${currentCoords.lat}, Lon: ${currentCoords.lon}` : ""}
+                value={currentCoords?.lat ? `Lat: ${currentCoords?.lat}, Lon: ${currentCoords?.lon}` : ""}
                 readOnly
                 />
               <div className="input-group-append">
                 <button  type="button" className="btn btn-primary w-100" onClick={fetchCurrentLocation}>
-                {currentCoords.lat ? "Location Set" : "Fetch Location"}
+                {currentCoords?.lat ? "Location Set" : "Fetch Location"}
                 </button>
               </div>
             </div>
@@ -202,7 +202,7 @@ const PlanTrip = () => {
 
               }}
             />
-            {(loadingPickup || pickupSuggestions.length > 0) && (
+            {(loadingPickup || pickupSuggestions?.length > 0) && (
               <div className="position-absolute w-100 bg-white border rounded mt-1 z-3">
                 {loadingPickup && (
                   <div className="d-flex justify-content-center py-2">
@@ -210,16 +210,16 @@ const PlanTrip = () => {
                   </div>
                 )}
                 <ul className="list-group list-group-flush">
-                  {pickupSuggestions.map((suggestion, index) => (
+                  {pickupSuggestions?.map((suggestion, index) => (
                     <li
                       key={index}
                       className="list-group-item list-group-item-action"
                       onClick={() => {
-                        setPickupCity(suggestion.display_name);
+                        setPickupCity(suggestion?.display_name);
                         setPickupSuggestions([]);
                       }}
                     >
-                      {suggestion.display_name}
+                      {suggestion?.display_name}
                     </li>
                   ))}
                 </ul>
@@ -240,7 +240,7 @@ const PlanTrip = () => {
                 }}
               />
 
-               {(loadingDropoff || dropoffSuggestions.length > 0) && (
+               {(loadingDropoff || dropoffSuggestions?.length > 0) && (
                   <div className="position-absolute w-100 bg-white border rounded mt-1 z-3">
                     {loadingDropoff && (
                       <div className="d-flex justify-content-center py-2">
@@ -248,16 +248,16 @@ const PlanTrip = () => {
                       </div>
                     )}
                     <ul className="list-group list-group-flush">
-                      {dropoffSuggestions.map((suggestion, index) => (
+                      {dropoffSuggestions?.map((suggestion, index) => (
                         <li
                           key={index}
                           className="list-group-item list-group-item-action"
                           onClick={() => {
-                            setDropoffCity(suggestion.display_name);
+                            setDropoffCity(suggestion?.display_name);
                             setDropoffSuggestions([]);
                           }}
                         >
-                          {suggestion.display_name}
+                          {suggestion?.display_name}
                         </li>
                       ))}
                     </ul>

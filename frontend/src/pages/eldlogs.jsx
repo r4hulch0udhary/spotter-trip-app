@@ -35,9 +35,7 @@ const ELDLog = () => {
             },
           });
 
-          const trips = res.data.trips || [];
-          console.log(trips,'vtrips');
-          
+          const trips = res.data.trips || [];          
           const processed = trips.map((trip) => {
             const stopSchedule = trip.stop_schedule || [];
             let breakIndex = 0;
@@ -125,10 +123,10 @@ const drawGraph = (logData) => {
 
   const redDots = [];
 
-  if (!logData.length) return;
+  if (!logData?.length) return;
 
   const rawStart = new Date(logData[0].rawTime);
-  const rawEnd = new Date(logData[logData.length - 1].rawTime);
+  const rawEnd = new Date(logData[logData?.length - 1].rawTime);
   const minTime = new Date(rawStart.getTime() - 60 * 60 * 1000); // pad 1 hour
   const maxTime = new Date(rawEnd.getTime() + 60 * 60 * 1000);
   const totalMinutes = (maxTime - minTime) / (1000 * 60);
@@ -168,7 +166,7 @@ const drawGraph = (logData) => {
   };
 
   // Draw step-line and dots
-  for (let i = 0; i < logData.length - 1; i++) {
+  for (let i = 0; i < logData?.length - 1; i++) {
     const curr = logData[i];
     const next = logData[i + 1];
 
@@ -206,7 +204,7 @@ const drawGraph = (logData) => {
   }
 
   // Last point
-  const last = logData[logData.length - 1];
+  const last = logData[logData?.length - 1];
   const lastX = getX(last.rawTime);
   const lastY = 30 + (statusRowMap[last.status] ?? 0) * 30;
 
