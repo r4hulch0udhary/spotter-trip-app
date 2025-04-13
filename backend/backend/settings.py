@@ -25,13 +25,15 @@ SECRET_KEY = 'django-insecure-1sfy2sfvaxd%9c3%irrg+nkgvjb+3mxqhn6414%i=6fd-6(vl^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "https://spotter-trip-app.vercel.app"]
 
 
 ALLOWED_HOSTS = ['*']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React frontend
+    "https://spotter-trip-app.vercel.app"
 ]
+
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies and authentication headers
 # Application definition
 
