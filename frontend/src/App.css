@@ -36,3 +36,678 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f4f7f6;
+  margin: 0;
+  padding: 0;
+}
+
+/* Full-Screen Centered Containers */
+.auth-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('https://source.unsplash.com/1920x1080/?nature,mountain') no-repeat center center/cover;
+}
+
+.auth-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.auth-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  z-index: 2;
+  width: 350px;
+}
+
+h2 {
+  color: #333;
+}
+
+/* Input Fields */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.password-field {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.password-field span {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+}
+
+/* Buttons */
+.btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease-in-out;
+  width: 20%;
+  float: inline-end;
+}
+
+.btn:hover {
+  background: #5563c1;
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    width: 90%;
+  }
+}
+
+
+/* navbar.css */
+.navbar {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px 20px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: all 0.3s ease-in-out;
+  backdrop-filter: blur(8px);
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.navbar-login-register{
+  display: flex;
+}
+.navbar-brand {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+.navbar-brand:hover {
+  color: #0056b3;
+}
+
+.navbar .btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4f8ff0, #007bff);
+  border: none;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #007bff, #0049b7);
+  transform: scale(1.05);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745, #218838);
+  border: none;
+  color: white;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: scale(1.05);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  border: none;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #c82333, #bd2130);
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .navbar .container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .navbar .btn {
+    margin-top: 8px;
+    width: 100%;
+  }
+}
+
+
+.trip-summary-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.trip-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.summary-container {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.summary-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 50%;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.summary-icon {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+.trip-map {
+  height: 400px;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.loading-text {
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+  margin-top: 20px;
+}
+
+
+/* Home Page Styles */
+.home-container {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 100px;
+}
+.summary-container {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  display: flex;
+  margin-top: 100px;
+}
+.login-btn{
+  width: 100%;
+}
+.login-container {
+  position: relative;
+  width: 100%;
+  overflow: auto;
+  display: flex;
+  margin-top: 100px;
+}
+
+/* Background Image */
+.background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('https://source.unsplash.com/1920x1080/?travel,adventure') no-repeat center center/cover;
+  filter: brightness(0.7);
+  z-index: -1;
+}
+
+/* Overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.overlay h1 {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.overlay p {
+  font-size: 1.4rem;
+  max-width: 650px;
+  line-height: 1.6;
+  opacity: 0.9;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .overlay h1 {
+    font-size: 2.5rem;
+  }
+
+  .overlay p {
+    font-size: 1.1rem;
+  }
+
+  .start-btn {
+    font-size: 1rem;
+    padding: 12px 24px;
+  }
+}
+
+
+.background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('https://source.unsplash.com/1600x900/?travel,nature') no-repeat center center/cover;
+  filter: brightness(0.5);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.overlay h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.overlay p {
+  font-size: 1.3rem;
+  max-width: 600px;
+  line-height: 1.6;
+  opacity: 0.9;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+
+/* Sidebar */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1000;
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1050;
+}
+
+.sidebar {
+  width: 250px;
+  height: 100%;
+  background: #222;
+  color: white;
+  padding: 20px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  font-size: 1rem;
+  text-decoration: none;
+  color: white;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Sidebar */
+@media (max-width: 768px) {
+  .overlay h1 {
+    font-size: 2.5rem;
+  }
+
+  .overlay p {
+    font-size: 1.1rem;
+  }
+
+  .start-btn {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .sidebar-item {
+    font-size: 0.9rem;
+  }
+}
+
+/* Card container */
+.plan-trip-container {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-top: 100px;
+}
+
+
+/* Heading */
+.plan-trip-container h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+/* Input fields */
+.plan-trip-container input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+/* Button */
+.plan-trip-container button {
+  width: 20%;
+  padding: 12px;
+  background-color: #28a745;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.plan-trip-container button:hover {
+  background-color: #218838;
+}
+
+.plan-trip-container button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Error message */
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Trip details */
+.trip-details {
+  background: #f1f3f5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.trip-details p {
+  margin: 5px 0;
+}
+
+/* Map styling */
+#map {
+  width: 100%;
+  height: 300px;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+@media (min-width: 768px) {
+  .input-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .input-group input {
+    flex: 1;
+  }
+}
+
+/* Full-screen background */
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-image: url("./styles/travel.jpg");
+  /* Replace with your image */
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.7);
+  /* Dark overlay effect */
+  z-index: -1;
+}
+
+/* Centered overlay content */
+.overlay {
+  position: relative;
+  text-align: center;
+  color: white;
+  padding: 20px;
+  margin-top: 20vh;
+}
+
+/* Button styling */
+.start-btn {
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  text-decoration: none;
+}
+
+.start-btn:hover {
+  background: #0056b3;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .start-btn {
+    font-size: 0.9rem;
+  }
+}
+
+.w-20{
+  width: 20%;
+}
+
+.timeline {
+  position: relative;
+  margin-left: 20px;
+  padding-left: 20px;
+  border-left: 3px solid #0d6efd;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -11px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #0d6efd;
+  border: 2px solid white;
+  z-index: 1;
+}
+
+.timeline-content {
+  padding-left: 10px;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 12px;
+}
+
+.timeline-marker.break {
+  background-color: orange;
+}
+
+.timeline-marker.sleep {
+  background-color: #6f42c1;
+}
+
+.timeline-marker.fuel-stop {
+  background-color: green;
+}
+
+.timeline-marker.pickup {
+  background-color: #198754;
+}
+
+.timeline-marker.drop-off {
+  background-color: red;
+}
