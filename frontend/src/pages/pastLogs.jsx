@@ -21,7 +21,6 @@ const PastLogPage = () => {
         })
         .then(res => res.json())
         .then(data => {
-            console.log(data, "data");
             setTrips(data?.past_trips);
         })
         .catch(err => console.error("Error fetching past logs:", err));
@@ -92,7 +91,7 @@ const PastLogPage = () => {
                 </div>
 
                 {/* Pagination Controls */}
-                {trips.length > 0 && totalPages > 1 && (
+                {trips?.length > 0 && totalPages > 1 && (
                 <div className="d-flex justify-content-between mt-3">
                     <button className="btn btn-secondary" onClick={prevPage} disabled={currentPage === 1}>
                         ◀ Previous
